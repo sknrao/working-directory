@@ -1,7 +1,8 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
-**Status:** ready to try (first-time friendly)  
+**Status:** dh2 needs a **targeted cleanup**, then fresh GOAL-01  
 **Owner:** OPI (lab)  
+**Lab host:** `dh2` (inventory from 2026-11-04)  
 **Code in this workspace:**
 - OPI operator source: `dpu-operator/`
 - NVIDIA companion adapter: `opi-nvidia-dpf-adapter/`
@@ -13,18 +14,140 @@
 ## Goal (one sentence)
 
 On the **host** Kubernetes cluster, apply one OPI `DpuOperatorConfig` so
-the NVIDIA adapter’s LCM **Helm-installs** `dpf-operator` **v26.4.0**.
+the NVIDIA adapter’s LCM **Helm-installs** NVIDIA `dpf-operator` **v26.4.0**.
 
-**PASS** = `dpf-operator-system` exists, its Deployment is Ready, and DPF
-CRDs appear — without you running `helm install dpf-operator` yourself.
+**PASS:** LCM action `installed`, `dpf-operator-system` Deployment Ready, DPF
+CRDs appear — driven by OPI, not by a pre-existing lab install.
 
 ---
 
-## What you have (assumed)
+## Lab inventory — dh2 (2026-11-04)
 
-- 1 physical server with an NVIDIA DPU (BlueField).
-- This is your **first** end-to-end try.
-- You may not have Kubernetes / cert-manager / Argo / OPI installed yet.
+| Already present | Keep or remove? |
+|---|---|
+| `kube-system` (k3s) | **KEEP** |
+| `cert-manager` | **KEEP** (T1 prereq) |
+| Full stack in `dpf-operator-system` (DPF + Argo + NFD + Kamaji + …) | **REMOVE** for a true fresh install |
+| `opi-nvidia-dpf-adapter-system` | **REMOVE** (old intern image; redeploy ours after cleanup) |
+| `opi-dpu-tenant` | **REMOVE** (tenant leftover from prior DPF) |
+| `openshift-dpu-operator` | absent today — install later in **T2** |
+
+### Should you clean up first?
+
+**Yes — for your goal.** If DPF is already running, OPI cannot prove
+“deploy `dpf-operator`”; LCM would only detect/adopt.
+
+**But do not wipe the whole machine / k3s / cert-manager.**
+
+Do a **targeted** teardown (**T-clean** below), reinstall Argo (and other
+DPF Helm prereqs) **outside** the old DPF namespace, then T2 → T3 → T4.
+
+---
+
+## T-clean — targeted remove (do this before T2)
+
+Run on `dh2` as root (or with working `kubectl` / `helm`).
+
+### T-clean.0 — Snapshot (paste into Results)
+
+```bash
+helm list -A
+kubectl get ns
+kubectl get dpuoperatorconfig -A 2>/dev/null || true
+kubectl get crd | grep -E 'dpu\.nvidia|dpuoperator|dataprocessingunit|servicefunction' || true
+```
+
+### T-clean.1 — Remove old NVIDIA adapter
+
+```bash
+cd /path/to/opi-nvidia-dpf-adapter   # on the machine that has the repo
+make undeploy
+# if make undeploy is not available from dh2, from any workstation with kubeconfig:
+#   kubectl delete ns opi-nvidia-dpf-adapter-system --wait=true
+```
+
+**Expect:** namespace `opi-nvidia-dpf-adapter-system` gone.
+
+### T-clean.2 — Remove OPI tenant leftover
+
+```bash
+kubectl delete ns opi-dpu-tenant --wait=true
+```
+
+**Expect:** namespace gone (ignore NotFound).
+
+### T-clean.3 — Remove existing DPF (and everything currently in that ns)
+
+On this lab, Argo/NFD/Kamaji live **inside** `dpf-operator-system`, so
+removing DPF also removes those pods. That is expected; you reinstall
+prereqs in T1 after cleanup.
+
+```bash
+# See release name(s)
+helm list -n dpf-operator-system
+
+# Typical release name from NVIDIA docs / our pin:
+helm uninstall dpf-operator -n dpf-operator-system --wait || true
+
+# If other releases remain in that ns, uninstall them too:
+# helm list -n dpf-operator-system
+# helm uninstall <name> -n dpf-operator-system --wait
+
+# Delete leftover namespace / CRDs only after helm uninstall
+kubectl delete ns dpf-operator-system --wait=true || true
+```
+
+**Optional harder clean** (only if CRDs/CRs block a later install — ask
+before running if unsure):
+
+```bash
+# List DPF CRDs (do not delete yet unless install fails later)
+kubectl get crd | grep '\.nvidia\.com$'
+```
+
+**Expect after T-clean.3**
+
+```bash
+kubectl get ns | grep -E 'dpf-operator|opi-nvidia|opi-dpu-tenant' || echo "cleaned"
+kubectl get deploy -A | grep -i dpf || echo "no dpf deploys"
+```
+
+- Those namespaces gone  
+- No `dpf-operator-controller-manager`  
+- **`cert-manager` and `kube-system` still healthy**
+
+### T-clean.4 — Reinstall Argo CD (prereq again)
+
+Argo was inside the deleted ns, so put it back **before** OPI installs DPF.
+Prefer a dedicated namespace (not `dpf-operator-system`):
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+helm upgrade --install argo-cd argo/argo-cd \
+  --namespace argocd \
+  --create-namespace \
+  --version 9.4.1 \
+  --wait
+kubectl get crd applications.argoproj.io
+```
+
+Confirm cert-manager still OK:
+
+```bash
+kubectl get pods -n cert-manager
+kubectl get crd certificates.cert-manager.io
+```
+
+**Then continue with T2 → T3 → T4** in this file (skip T0; T1 is now
+cert-manager keep + Argo reinstall above).
+
+---
+
+## What you have (general)
+
+- 1 physical server with an NVIDIA DPU (BlueField) — lab host **dh2**.
+- Prior intern/lab install left DPF + old adapter; clean those first.
 
 ---
 
