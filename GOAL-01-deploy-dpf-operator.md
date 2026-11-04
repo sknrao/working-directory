@@ -171,24 +171,29 @@ git submodule update --init --recursive
 
 ### T2.2 — Set registry + kubeconfig (do not skip)
 
-Upstream `taskfile.yaml` hardcodes:
+**Do not edit `taskfile.yaml`.** Leave upstream defaults as-is.
 
-- `KUBECONFIG_HOST: "/root/kubeconfig.ocpcluster"`
+Upstream hardcodes `KUBECONFIG_HOST: "/root/kubeconfig.ocpcluster"`. Override it only when you **run** Task, by appending `KUBECONFIG_HOST=…` to the command (T2.4). That is a Task CLI override, not a file change.
 
-**`export KUBECONFIG_HOST=…` alone does NOT override that Task var.**  
-Pass it on the **task command line** every time (shown below).
+| Setting | How to set | Edit taskfile? |
+|---|---|---|
+| `REGISTRY` | `export REGISTRY=docker.io/<user>` in the shell (taskfile reads this env) | **No** |
+| `KUBECONFIG_HOST` | Pass on the task command: `task … KUBECONFIG_HOST=/path/to/kubeconfig` | **No** |
+| `KUBECONFIG` (kubectl) | `export KUBECONFIG=/path/to/kubeconfig` for your own kubectl | **No** |
 
-`REGISTRY` *does* read the shell env (taskfile shell checks `${REGISTRY:-}`). If unset, it defaults to `hostname:5000` (wrong for Docker Hub).
+If `REGISTRY` is unset, Task defaults to `hostname:5000` (wrong for Docker Hub).
 
 ```bash
 cd ~/dpu-operator
 
 export PATH=/usr/local/go/bin:$(go env GOPATH)/bin:$PATH
 
-# REQUIRED — Docker Hub
+# 1) Docker Hub registry (shell export is enough for REGISTRY)
 export REGISTRY=docker.io/<YOUR_DOCKERHUB_USER>
 
-# Path Task must use (also use with kubectl)
+# 2) Remember the real kubeconfig path for later task CLI + kubectl
+#    Common on k3s: /etc/rancher/k3s/k3s.yaml
+#    Or whatever file already works for: kubectl get nodes
 HOST_KUBECONFIG="${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 export KUBECONFIG="$HOST_KUBECONFIG"
 
@@ -199,6 +204,8 @@ test -f "$HOST_KUBECONFIG" || { echo "MISSING kubeconfig file"; exit 1; }
 kubectl --kubeconfig "$HOST_KUBECONFIG" get nodes
 buildah login --get-login docker.io
 ```
+
+You still only **export** here. The `KUBECONFIG_HOST=…` override is applied in **T2.4** on the task line — still without touching `taskfile.yaml`.
 
 ### T2.3 — Build and push images
 
