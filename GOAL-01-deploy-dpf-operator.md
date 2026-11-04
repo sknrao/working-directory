@@ -1,50 +1,73 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
-**Status:** ready to try  
+**Status:** ready to try (first-time friendly)  
 **Owner:** OPI (lab)  
-**Code tree:** `opi-nvidia-dpf-adapter/` (clean tree; not `*-experiment`)  
-**Created:** 2026-11-03
+**Code in this workspace:**
+- OPI operator source: `dpu-operator/`
+- NVIDIA companion adapter: `opi-nvidia-dpf-adapter/`
+**Created:** 2026-11-03  
+**Updated:** 2026-11-04
 
 ---
 
-## Goal
+## Goal (one sentence)
 
-On the **host** Kubernetes cluster, applying one OPI `DpuOperatorConfig`
-causes the companion adapter’s LCM to **Helm-install** NVIDIA
-`dpf-operator` **v26.4.0** into `dpf-operator-system`.
+On the **host** Kubernetes cluster, apply one OPI `DpuOperatorConfig` so
+the NVIDIA adapter’s LCM **Helm-installs** `dpf-operator` **v26.4.0**.
 
-Success = namespace + Deployment + DPF CRDs present, driven by the OPI CR
-(not by you running `helm install dpf-operator` yourself).
+**PASS** = `dpf-operator-system` exists, its Deployment is Ready, and DPF
+CRDs appear — without you running `helm install dpf-operator` yourself.
 
 ---
 
-## What you have / assumptions
+## What you have (assumed)
 
 - 1 physical server with an NVIDIA DPU (BlueField).
-- You may or may not already have Kubernetes on the **host**.
-- **DPU-side Kubernetes is NOT required for this goal.**
-- First-time lab pass is fine; do not skip gates.
+- This is your **first** end-to-end try.
+- You may not have Kubernetes / cert-manager / Argo / OPI installed yet.
 
 ---
 
-## Architecture (this goal only)
+## Host vs DPU (read once)
 
-| Place | Needed now? |
+| Place | For GOAL-01 |
 |---|---|
-| Host x86 — one Kubernetes cluster | **Yes** — everything runs here |
-| DPU ARM — Kubernetes / tenant cluster | **No** — later goals |
+| **Host** (x86) | Install **one** Kubernetes here. All of T0–T4 run on this cluster. |
+| **DPU** (ARM on the card) | **Do nothing.** No K8s on the DPU for this goal. |
 
-Prerequisites = things that must already exist **on the host cluster**
-before the adapter will install DPF. The adapter **checks** them; it does
-**not** install cert-manager or Argo CD for you.
+“Fix prereqs” always means: finish the failed **host-cluster** gate below,
+then continue. It never means “install Kubernetes on the DPU”.
 
 ---
 
-## Steps and expectations
+## Tools you need on the machine that talks to the cluster
+
+- `kubectl` (or `oc`) pointed at the **host** cluster  
+- `helm` v3  
+- Docker or Podman (to build/push images)  
+- Go 1.22+ (for `dpu-operator` `task` helpers)  
+- A container registry the **cluster nodes can pull from**  
+  (local registry, quay.io, ghcr.io, etc.)
+
+Set kubeconfig for the rest of this doc:
+
+```bash
+export KUBECONFIG=/path/to/host-cluster.kubeconfig
+kubectl get nodes   # must work before anything else
+```
+
+---
+
+## Steps
 
 ### T0 — Host Kubernetes only
 
-**Do:** Ensure one Kubernetes cluster on the **host** (not on the DPU).
+**Do**
+
+1. Install or reuse **one** Kubernetes on the **host** (k3s / kubeadm / lab
+   cluster — whatever you already use). Prefer **Kubernetes 1.36.x**
+   (adapter pin).
+2. Confirm:
 
 ```bash
 kubectl get nodes
@@ -53,67 +76,213 @@ kubectl version
 
 **Expect**
 
-- ≥1 node `Ready`
-- Prefer Kubernetes **v1.36.x** (adapter pin)
+- At least one node `Ready`
+- Server version ideally `v1.36.x`
 
-**Stop if:** no cluster / no Ready node.
+**Stop if:** `kubectl` fails or no Ready node. Do not continue.
+
+**Results → paste under Results / T0**
 
 ---
 
-### T1 — DPF prerequisites on the host cluster
+### T1 — Install DPF prerequisites (cert-manager + Argo CD)
 
-**Do:** Install **cert-manager** and **Argo CD** on that same cluster  
-(see [DPF 26.4 Helm prerequisites](https://networking-docs.nvidia.com/dpf/26.4.0/helm-prerequisites) if you need exact charts).
+NVIDIA DPF requires these **before** `dpf-operator`. Our adapter only
+**checks** them; it will not install them.
+
+#### T1a — cert-manager
+
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm upgrade --install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.19.3 \
+  --set crds.enabled=true \
+  --wait
+```
+
+**Expect**
 
 ```bash
 kubectl get crd certificates.cert-manager.io
-kubectl get crd applications.argoproj.io
+kubectl get pods -n cert-manager
 ```
 
-**Expect:** both CRDs exist (not `NotFound`).
+- CRD exists  
+- cert-manager pods Running  
 
-**Stop if:** either missing → LCM will report `Blocked` and skip install.  
-“Fix prereqs” means finish T1, then continue — not “install K8s on the DPU”.
+#### T1b — Argo CD
+
+Minimal install (enough for the CRD the adapter checks). For production
+DPF values see
+[DPF 26.4 Helm prerequisites](https://networking-docs.nvidia.com/dpf/26.4.0/helm-prerequisites).
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+helm upgrade --install argo-cd argo/argo-cd \
+  --namespace argocd \
+  --create-namespace \
+  --version 9.4.1 \
+  --wait
+```
+
+**Expect**
+
+```bash
+kubectl get crd applications.argoproj.io
+kubectl get pods -n argocd
+```
+
+- CRD exists  
+- Argo pods Running (or at least CRD present; adapter gates on the CRD)
+
+**Stop if:** either CRD is `NotFound`. Fix T1 before T2.
+
+**Optional check that DPF is not already installed**
+
+```bash
+kubectl get ns dpf-operator-system 2>/dev/null || echo "no dpf-operator-system yet (good for fresh install)"
+```
+
+If the namespace / Deployment already exists from a prior manual Helm
+install, GOAL-01 may report `unmanaged` instead of a fresh install —
+note that in Results.
+
+**Results → paste under Results / T1**
 
 ---
 
-### T2 — Deploy OPI `dpu-operator`
+### T2 — Deploy OPI `dpu-operator` (concrete how-to)
 
-**Do:** Install OPI CRDs + operator on the host cluster.
+This installs the **OPI** operator + CRDs on the **host** cluster.
+Source in this workspace: `dpu-operator/`.
+
+You need:
+- `task` (Taskfile) — https://taskfile.dev  
+  or use the repo helper: `go run tools/task/task.go …`
+- A registry the cluster can pull from
+
+#### T2.1 — One-time: point deploy at your host kubeconfig
+
+Upstream `task` defaults to `/root/kubeconfig.ocpcluster`. Override it:
+
+```bash
+cd dpu-operator
+
+# Example: use your current kubeconfig as the "host" kubeconfig for task
+export KUBECONFIG_HOST="${KUBECONFIG:-$HOME/.kube/config}"
+# optional: copy for clarity
+# cp "$KUBECONFIG_HOST" /tmp/kubeconfig.host
+# export KUBECONFIG_HOST=/tmp/kubeconfig.host
+```
+
+#### T2.2 — Registry + build images
+
+```bash
+cd dpu-operator
+
+# REQUIRED: registry reachable from cluster nodes (change me)
+export REGISTRY=quay.io/<your-org>   # or local registry IP:port
+
+# Install task if needed (pick one)
+#   go install github.com/go-task/task/v3/cmd/task@latest
+#   or: go run ./tools/task/task.go <target>   # uses repo-bundled runner
+
+task build-image-all
+```
+
+**Expect:** images built locally (no error). They are not on the cluster yet.
+
+#### T2.3 — Deploy operator (single host cluster)
+
+Because you have **one server / one cluster**, use the **1-cluster**
+upstream + cert-manager profile (matches T1):
+
+```bash
+cd dpu-operator
+export REGISTRY=quay.io/<your-org>
+export KUBECONFIG_HOST="${KUBECONFIG:-$HOME/.kube/config}"
+
+# Pushes images and applies manifests to the host cluster only
+task deploy-upstream-certmanager-1c
+```
+
+What this does (in plain language):
+- Builds/pushes operator images to `$REGISTRY`
+- Applies OPI CRDs + controller into namespace `openshift-dpu-operator`
+- Waits until `dpu-operator-controller-manager` is Available
+
+**Do not** apply `examples/config.yaml` yet. That creates
+`DpuOperatorConfig`; we do that in **T4** with NVIDIA annotations.
+
+#### T2.4 — Verify
 
 ```bash
 kubectl get crd dpuoperatorconfigs.config.openshift.io
-kubectl get pods -A | grep -i dpu
+kubectl get crd dataprocessingunits.config.openshift.io
+kubectl get crd servicefunctionchains.config.openshift.io
+kubectl get deploy,pods -n openshift-dpu-operator
 ```
 
-**Expect:** CRD exists; OPI operator pods Running.
+**Expect**
+
+- Those three CRDs exist  
+- `dpu-operator-controller-manager` Deployment Available  
+- Controller pod Running  
+
+**Stop if:** ImagePullBackOff (registry/auth), CrashLoop, or CRDs missing.
+
+**If `task` is painful**, say so in Results — we can switch you to a
+minimal `make`/kustomize-only CRD+manager path next iteration. For now
+`task deploy-upstream-certmanager-1c` is the supported 1-cluster path
+from upstream README.
+
+**Results → paste under Results / T2**
 
 ---
 
-### T3 — Deploy `opi-nvidia-dpf-adapter`
+### T3 — Deploy NVIDIA companion adapter
 
-**Do** (machine with Docker + push access to a registry the cluster can pull):
+This is **not** inside `dpu-operator`. It is
+`opi-nvidia-dpf-adapter/` (the clean tree we prepared).
 
 ```bash
 cd opi-nvidia-dpf-adapter
+
+# Same idea: registry the cluster can pull
 export IMG=<your-registry>/opi-nvidia-dpf-adapter:goal01
+
 make docker-build docker-push IMG=$IMG
 make deploy IMG=$IMG
 ```
 
+Verify:
+
 ```bash
 kubectl get deploy,pods -n opi-nvidia-dpf-adapter-system
-kubectl logs -n opi-nvidia-dpf-adapter-system deploy/opi-nvidia-dpf-adapter-controller-manager -c manager --tail=50
+kubectl logs -n opi-nvidia-dpf-adapter-system \
+  deploy/opi-nvidia-dpf-adapter-controller-manager -c manager --tail=80
 ```
 
-**Expect:** Deployment Available; pods Running; no CrashLoop.  
-Controller must reach NGC (`helm.ngc.nvidia.com`) to pull the chart.
+**Expect**
+
+- Pods Running (manager; often 2 replicas with leader election)  
+- Logs mention Lifecycle Manager / no crash loop  
+- This pod must reach `https://helm.ngc.nvidia.com` (chart pull)
+
+**Stop if:** CrashLoop / ImagePullBackOff / no manager logs.
+
+**Results → paste under Results / T3**
 
 ---
 
-### T4 — Apply enablement CR (the actual first goal)
+### T4 — Apply OPI CR that triggers DPF install (the goal)
 
-**Do:** Prefer annotation-only form (works even if CRD lacks `spec.vendor`):
+Apply **one** `DpuOperatorConfig`. Use annotations so it works even if
+the CRD has no `spec.vendor` field yet:
 
 ```bash
 kubectl apply -f - <<'EOF'
@@ -129,84 +298,109 @@ spec:
 EOF
 ```
 
-(Optional alternate if CRD has `spec.vendor`:  
-`kubectl apply -f opi-nvidia-dpf-adapter/config/samples/dpuoperatorconfig-nvidia.yaml`)
-
-**Expect within a few minutes:**
+Wait 2–5 minutes, then:
 
 ```bash
 kubectl get dpuoperatorconfig dpu-operator-config -o yaml
 kubectl get ns dpf-operator-system
 kubectl get deploy -n dpf-operator-system
+kubectl get pods -n dpf-operator-system
 kubectl get crd | grep provisioning.dpu.nvidia.com
+kubectl logs -n opi-nvidia-dpf-adapter-system \
+  deploy/opi-nvidia-dpf-adapter-controller-manager -c manager --tail=100 \
+  | grep -iE 'ensure|helm|install|VendorOperator|Blocked|unmanaged|error' || true
 ```
 
-| Result | Meaning |
+**Expect (PASS)**
+
+| Check | Want |
 |---|---|
-| `dpf-operator-system` + Deployment Ready + DPF CRDs | **GOAL-01 PASS** |
-| Conditions `Blocked` / missing argo or cert-manager | Back to T1 |
-| Logs/status `unmanaged` | DPF already installed outside adapter — note it below |
-| Helm / NGC errors in adapter logs | Network from controller pod to NGC |
+| `dpf-operator-system` namespace | exists |
+| Deployment in that ns | Ready (e.g. `dpf-operator-controller-manager`) |
+| CRDs | `dpus.provisioning.dpu.nvidia.com` (and related) present |
+| Conditions on `DpuOperatorConfig` | `VendorOperatorSupported=True`; Ready progressing |
+| Adapter logs | `installed` / `adopted` / `noop` — **not** stuck on `Blocked` |
+
+**Common non-PASS outcomes**
+
+| Symptom | Meaning | What to do |
+|---|---|---|
+| `Blocked` / missing argo-cd or cert-manager | T1 incomplete | Fix T1, wait for reconcile |
+| `unmanaged` | DPF already installed by plain Helm | Note in Results; we may adopt or clean |
+| Helm / NGC errors | Controller cannot pull chart | Fix egress / NGC from adapter pod |
+| Apply rejected on CR | CRD schema mismatch | Paste full error |
+
+**Results → paste under Results / T4 + Verdict**
 
 ---
 
-### Out of scope for GOAL-01
+## Out of scope for GOAL-01
 
-- Kubernetes on the DPU  
-- `DataProcessingUnit` / `ServiceFunctionChain` CRs  
-- Traffic / provisioning Ready on the BlueField  
+- Installing Kubernetes on the DPU  
+- Labeling nodes / Intel-Marvell VSP daemons beyond what deploy created  
+- Applying `DataProcessingUnit` or `ServiceFunctionChain`  
+- Proving BlueField traffic / provisioning `Ready`
 
 ---
 
-## Results log (paste here when you return)
+## Results log (fill this in when you return)
 
-### Run date
+### Meta
 
 - Date / time:
 - Lab host / cluster name:
-- Who ran it:
+- `KUBECONFIG` path used:
+- `REGISTRY` / `IMG` used:
 
 ### T0
 
 ```text
-# paste: kubectl get nodes
-# paste: kubectl version (client + server)
+# kubectl get nodes
+# kubectl version
 ```
 
 ### T1
 
 ```text
-# paste: kubectl get crd certificates.cert-manager.io applications.argoproj.io
+# kubectl get crd certificates.cert-manager.io applications.argoproj.io
+# kubectl get pods -n cert-manager
+# kubectl get pods -n argocd
+# optional: kubectl get ns dpf-operator-system
 ```
 
 ### T2
 
 ```text
-# paste: CRD + OPI pod status
+# commands you actually ran (task target, REGISTRY, KUBECONFIG_HOST)
+# kubectl get crd dpuoperatorconfigs.config.openshift.io
+# kubectl get deploy,pods -n openshift-dpu-operator
+# errors if any
 ```
 
 ### T3
 
 ```text
-# paste: IMG=...
-# paste: deploy/pods in opi-nvidia-dpf-adapter-system
-# paste: last ~50 manager log lines if useful
+# IMG=...
+# kubectl get deploy,pods -n opi-nvidia-dpf-adapter-system
+# manager logs (tail) if useful
 ```
 
 ### T4
 
 ```text
-# paste: kubectl get dpuoperatorconfig dpu-operator-config -o yaml  (status.conditions especially)
-# paste: kubectl get deploy -n dpf-operator-system
-# paste: kubectl get crd | grep provisioning.dpu.nvidia.com
+# kubectl get dpuoperatorconfig dpu-operator-config -o yaml
+#   (especially status.conditions)
+# kubectl get deploy,pods -n dpf-operator-system
+# kubectl get crd | grep provisioning.dpu.nvidia.com
+# relevant adapter log lines
 ```
 
 ### Verdict
 
 - [ ] PASS — `dpf-operator` present via OPI path  
-- [ ] BLOCKED — prereqs  
+- [ ] BLOCKED — prereqs (T1)  
 - [ ] UNMANAGED — pre-existing Helm release  
-- [ ] FAIL — other (describe below)
+- [ ] FAIL — other  
 
 Notes:
 
