@@ -1,8 +1,8 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
-**Status:** dh2 needs a **targeted cleanup**, then fresh GOAL-01  
+**Status:** T-clean + Argo OK on dh2 (2026-11-04) — **next: T2** (OPI dpu-operator)  
 **Owner:** OPI (lab)  
-**Lab host:** `dh2` (inventory from 2026-11-04)  
+**Lab host:** `dh2`  
 **Code in this workspace:**
 - OPI operator source: `dpu-operator/`
 - NVIDIA companion adapter: `opi-nvidia-dpf-adapter/`
@@ -116,20 +116,134 @@ kubectl get deploy -A | grep -i dpf || echo "no dpf deploys"
 - No `dpf-operator-controller-manager`  
 - **`cert-manager` and `kube-system` still healthy**
 
+#### If `kubectl delete ns dpf-operator-system` hangs (Terminating)
+
+Helm left CRDs (and often CRs) behind with `helm.sh/resource-policy: keep`.
+The namespace stays `Terminating` until those in-namespace objects are gone
+or their finalizers are cleared.
+
+**1. Confirm stuck**
+
+```bash
+kubectl get ns dpf-operator-system -o yaml | head -40
+# look for: status.phase: Terminating
+```
+
+**2. See what still exists in the ns**
+
+```bash
+kubectl api-resources --verbs=list --namespaced -o name \
+  | while read r; do
+      kubectl get -n dpf-operator-system "$r" -o name 2>/dev/null
+    done
+```
+
+**3. Delete common leftover CRs (ignore NotFound)**
+
+```bash
+# DPF / Kamaji leftovers that often block ns delete
+kubectl delete dpucluster,dpu,dpudevice,dpuset,dpuservice,dpuservicechain \
+  --all -n dpf-operator-system --timeout=60s 2>/dev/null || true
+kubectl delete applications.argoproj.io,appprojects.argoproj.io \
+  --all -n dpf-operator-system --timeout=60s 2>/dev/null || true
+kubectl delete datastore --all -n dpf-operator-system --timeout=60s 2>/dev/null || true
+```
+
+**4. If still Terminating — strip finalizers on stuck objects**
+
+```bash
+# Example for one kind; repeat for whatever step 2 listed
+for kind in dpu dpucluster dpuservice datastore application; do
+  for name in $(kubectl get "$kind" -n dpf-operator-system -o name 2>/dev/null); do
+    kubectl patch "$name" -n dpf-operator-system --type=json \
+      -p='[{"op":"remove","path":"/metadata/finalizers"}]' 2>/dev/null || true
+  done
+done
+```
+
+**5. Last resort — clear namespace finalizers**
+
+Only after objects are gone or patched:
+
+```bash
+kubectl get ns dpf-operator-system -o json \
+  | jq '.spec.finalizers=[]' \
+  | kubectl replace --raw /api/v1/namespaces/dpf-operator-system/finalize -f -
+```
+
+(`jq` required.) Then:
+
+```bash
+kubectl get ns dpf-operator-system || echo "namespace gone"
+```
+
+**6. CRDs may still remain** (Helm keep policy). That is OK for now;
+a later `helm install` of `dpf-operator` usually adopts/updates them.
+Do **not** mass-delete all `*.nvidia.com` CRDs unless a later install fails.
 ### T-clean.4 — Reinstall Argo CD (prereq again)
 
 Argo was inside the deleted ns, so put it back **before** OPI installs DPF.
-Prefer a dedicated namespace (not `dpf-operator-system`):
+Prefer a dedicated namespace (not `dpf-operator-system`).
+
+**If Helm errors with** `meta.helm.sh/release-namespace` must equal
+`argocd` but current value is `dpf-operator-system`: old Argo CRDs were
+kept by Helm policy. **Do not keep deleting the CRD** if it reappears
+with the same `CREATED AT` — it is stuck / ownership-blocked.
+
+**Preferred fix — re-home CRD ownership to the new release:**
 
 ```bash
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
+for crd in applications.argoproj.io applicationsets.argoproj.io appprojects.argoproj.io; do
+  kubectl get crd "$crd" >/dev/null 2>&1 || continue
+  kubectl annotate crd "$crd" \
+    meta.helm.sh/release-name=argo-cd \
+    meta.helm.sh/release-namespace=argocd \
+    --overwrite
+  kubectl label crd "$crd" app.kubernetes.io/managed-by=Helm --overwrite
+done
+
+helm upgrade --install argo-cd argo/argo-cd \
+  --namespace argocd \
+  --create-namespace \
+  --version 9.4.1 \
+  --wait
+```
+
+If your Helm is new enough, you can also add `--take-ownership`.
+
+**If CRD shows `deletionTimestamp` and Applications still listed** (common on
+dh2 after DPF teardown) — delete Applications first; they block CRD removal:
+
+```bash
+kubectl get applications.argoproj.io -A
+# force-remove finalizers + delete every Application
+kubectl get applications.argoproj.io -A -o json \
+  | jq -r '.items[] | "\(.metadata.namespace) \(.metadata.name)"' \
+  | while read ns name; do
+      kubectl patch applications.argoproj.io "$name" -n "$ns" --type=json \
+        -p='[{"op":"remove","path":"/metadata/finalizers"}]' 2>/dev/null || true
+      kubectl delete applications.argoproj.io "$name" -n "$ns" --wait=false 2>/dev/null || true
+    done
+kubectl get appprojects.argoproj.io -A -o name 2>/dev/null \
+  | while read r; do kubectl delete "$r" --wait=false 2>/dev/null || true; done
+
+# after Applications are gone, finish CRD delete
+kubectl patch crd applications.argoproj.io --type=json \
+  -p='[{"op":"remove","path":"/metadata/finalizers"}]' 2>/dev/null || true
+kubectl delete crd applications.argoproj.io applicationsets.argoproj.io appprojects.argoproj.io --wait=false 2>/dev/null || true
+kubectl get crd applications.argoproj.io 2>/dev/null || echo "argo CRDs gone"
+```
+
+Then:
+
+```bash
 helm upgrade --install argo-cd argo/argo-cd \
   --namespace argocd \
   --create-namespace \
   --version 9.4.1 \
   --wait
 kubectl get crd applications.argoproj.io
+kubectl get pods -n argocd
 ```
 
 Confirm cert-manager still OK:
