@@ -5,10 +5,10 @@ Scratch space for OPI ↔ NVIDIA DPF bring-up.
 
 | File | Purpose |
 |---|---|
-| [GOAL-01-deploy-dpf-operator.md](GOAL-01-deploy-dpf-operator.md) | First goal: install `dpf-operator` via OPI + adapter — **full commands** for T0–T4 (host K8s, cert-manager, Argo, `dpu-operator` task deploy, adapter, enablement CR) |
+| [GOAL-01-deploy-dpf-operator.md](GOAL-01-deploy-dpf-operator.md) | First goal: install `dpf-operator` via OPI + adapter. **Start at Tools checklist → T2** (cleanup/Argo already done on dh2). No assumed tools: Go 1.26.10, buildah/podman, Docker Hub login, Task `KUBECONFIG_HOST=` CLI override. |
 
 How we use it:
 
-1. Agent writes / updates the goal `.md` (concrete steps + expectations).
-2. You run the steps **in order**, stop at the first failed gate, and paste outputs into that file’s **Results** section (or paste the same into chat).
+1. Open the goal `.md` and run **from the stated next step** (do not skip the tools checklist).
+2. Stop at the first failed gate; paste outputs into that file’s **Results** section (or into chat).
 3. We iterate from those results.
