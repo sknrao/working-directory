@@ -1,9 +1,7 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
 **Lab host:** `dh2`  
-**Where you are (2026-11-04):** T-clean done; cert-manager OK; Argo in `argocd` OK.  
-**Next step:** **T2** — install OPI `dpu-operator`.  
-**Do not skip tool setup.** Every command below is required unless marked optional.
+**Where you are (2026-11-06):** Helm install OK (`VendorOperatorSupported=True`, `dpf-operator-controller-manager` Running). **Next: T5** — make `VendorOperatorReady` + `VendorDPUReady` True and clear VSP CrashLoop.
 
 ---
 
@@ -15,9 +13,17 @@ On the **host** Kubernetes cluster only:
 2. Deploy companion `opi-nvidia-dpf-adapter` (this repo’s clean tree).
 3. Apply one `DpuOperatorConfig` so the adapter LCM **Helm-installs**
    NVIDIA `dpf-operator` **v26.4.0**.
+4. Apply NVIDIA `DPFOperatorConfig`, stabilize VSP (hardware overlay), complete
+   DPF-required host reset so Ready conditions are True.
 
-**PASS:** `dpf-operator-system` exists, controller Deployment Ready, LCM
-logs show install (not a pre-existing lab leftover).
+**PASS:**
+
+| Check | Want |
+|---|---|
+| `dpf-operator-system` + `dpf-operator-controller-manager` | Available |
+| `dpf-provisioning-controller-manager` + `dpuservice-controller-manager` | Available |
+| OPI `DpuOperatorConfig` conditions | `VendorOperatorSupported=True`, `VendorOperatorReady=True`, `VendorDPUReady=True` |
+| Adapter pods | managers Running; `nvidia-vsp` Ready (no CrashLoop) |
 
 **DPU-side Kubernetes is not required for GOAL-01.**
 
@@ -230,28 +236,99 @@ What this does: compiles binaries, `buildah` builds images, `buildah manifest pu
 
 ### T2.4 — Deploy (single host cluster + cert-manager profile)
 
-Correct profile for **one** host Kubernetes cluster (not dual host/DPU):
+**Do not edit `taskfile.yaml`.** Pass overrides on the CLI.
+
+#### Critical: pass `DEPLOY_PROFILE` yourself
+
+Upstream wrapper `deploy-upstream-certmanager-1c` is supposed to set
+`DEPLOY_PROFILE=upstream-certmanager`, but Task often still runs nested
+`deploy-prep` / webhook steps with the **default** `openshift`.
+
+**Proof you hit this bug** (from a failed run):
+
+```text
+task: [deploy-prep] if [ "openshift" = "upstream-certmanager" ]; then
+```
+
+If you see `"openshift"` there, the wrong manifests were applied. On k3s
+that leaves the manager pod waiting for Secret `webhook-server-cert`
+(OpenShift serving-cert never creates it) → **ContainerCreating** until
+the 300s wait times out.
+
+#### Correct command (use this)
 
 ```bash
 cd ~/dpu-operator
 export REGISTRY=docker.io/<YOUR_DOCKERHUB_USER>
-HOST_KUBECONFIG="${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
+HOST_KUBECONFIG="${KUBECONFIG:-/home/sridhar/.kube/config}"   # use the path that works for you
+export KUBECONFIG="$HOST_KUBECONFIG"
 
-# Pass KUBECONFIG_HOST on the CLI — required
-task deploy-upstream-certmanager-1c KUBECONFIG_HOST="$HOST_KUBECONFIG"
-# OR:
-# go run ./tools/task/task.go deploy-upstream-certmanager-1c KUBECONFIG_HOST="$HOST_KUBECONFIG"
+# BOTH overrides on the CLI — required on k3s / non-OpenShift
+task deploy-1c \
+  KUBECONFIG_HOST="$HOST_KUBECONFIG" \
+  DEPLOY_PROFILE=upstream-certmanager
 ```
 
-What this does:
-- Rewrites image refs from `$REGISTRY`
-- Applies manifests into namespace `openshift-dpu-operator`
+Equivalent (also OK if you pass the profile explicitly):
+
+```bash
+task deploy-upstream-certmanager-1c \
+  KUBECONFIG_HOST="$HOST_KUBECONFIG" \
+  DEPLOY_PROFILE=upstream-certmanager
+```
+
+**While it runs, you must see this in deploy-prep output:**
+
+```text
+if [ "upstream-certmanager" = "upstream-certmanager" ]; then
+```
+
+If it still prints `"openshift" = "upstream-certmanager"`, stop (Ctrl-C) —
+the profile override did not take effect.
+
+What a good deploy does:
+- Copies `config/dev/kustomization-upstream-certmanager.yaml` → `bin/`
+- Creates cert-manager `Certificate` / `Issuer` so Secret `webhook-server-cert` exists
+- Applies manifests into `openshift-dpu-operator`
 - Waits for `dpu-operator-controller-manager` Available
 
 **Do NOT** run `kubectl apply -f examples/config.yaml` yet.  
 That creates `DpuOperatorConfig`; we do that in **T4** with NVIDIA annotations.
 
-### T2.5 — Verify T2
+#### If you already failed once (ContainerCreating / wait timeout)
+
+Diagnose (paste into Results if unsure):
+
+```bash
+kubectl -n openshift-dpu-operator get pods -o wide
+kubectl -n openshift-dpu-operator describe pod -l control-plane=controller-manager | tail -80
+kubectl -n openshift-dpu-operator get secret,certificate,issuer
+kubectl get validatingwebhookconfiguration dpu-operator-validating-webhook-configuration -o yaml | head -40
+```
+
+Typical bad describe line: `MountVolume.SetUp failed … secret "webhook-server-cert" not found`.
+
+Recover, then re-run the **correct** command above:
+
+```bash
+cd ~/dpu-operator
+export REGISTRY=docker.io/<YOUR_DOCKERHUB_USER>
+HOST_KUBECONFIG="${KUBECONFIG:-/home/sridhar/.kube/config}"
+
+# Clean with the SAME profile you will deploy
+task undeploy-1c KUBECONFIG_HOST="$HOST_KUBECONFIG"
+
+# If CRDs stuck Terminating from the failed run:
+kubectl get crd | grep config.openshift.io || true
+# Only if a CRD shows Terminating for a long time:
+# kubectl patch crd <name> --type=merge -p '{"metadata":{"finalizers":[]}}'
+
+task deploy-1c \
+  KUBECONFIG_HOST="$HOST_KUBECONFIG" \
+  DEPLOY_PROFILE=upstream-certmanager
+```
+
+### T2.5 — Verify T2 (trust the cluster, not only the task exit code)
 
 ```bash
 kubectl get ns openshift-dpu-operator
@@ -259,26 +336,57 @@ kubectl get crd dpuoperatorconfigs.config.openshift.io
 kubectl get crd dataprocessingunits.config.openshift.io
 kubectl get crd servicefunctionchains.config.openshift.io
 kubectl get deploy,pods -n openshift-dpu-operator -o wide
-kubectl describe deploy -n openshift-dpu-operator dpu-operator-controller-manager | tail -40
+kubectl -n openshift-dpu-operator get certificate,issuer,secret webhook-server-cert
+kubectl -n openshift-dpu-operator get deploy dpu-operator-controller-manager
 ```
 
 **Expect**
 
 - Namespace `openshift-dpu-operator` exists  
-- Three CRDs exist  
-- Deployment Available; pod(s) Running  
+- CRDs `dpuoperatorconfigs`, `dataprocessingunits`, `servicefunctionchains` exist (DPU CRDs may briefly show Terminating from undeploy; they should settle)  
+- Deployment **Available**; current manager pod **Running / Ready**  
+- Certificate Ready; Secret `webhook-server-cert` present  
+
+#### Known flake: task exits 1 but deploy is fine
+
+After cert sync the task restarts the Deployment, then runs:
+
+```text
+kubectl … wait --for=condition=ready pod --all
+```
+
+If an **old** ReplicaSet pod disappears mid-wait, kubectl can print:
+
+```text
+Error from server (NotFound): pods "dpu-operator-controller-manager-….…" not found
+task: Failed to run task "deploy-1c": exit status 1
+```
+
+even when the **new** pod is Ready and `wait --for=condition=Available deployment/…` already succeeded.
+
+**Treat as PASS when all of these are true:**
+
+1. Log showed `"upstream-certmanager" = "upstream-certmanager"`
+2. `deployment … successfully rolled out` / Available condition met
+3. Current pod Ready (your `describe` showed Ready=True)
+4. `certificate` Ready and `webhook-server-cert` exists
+
+Do **not** re-run undeploy/deploy just because of that NotFound flake. Continue to **T3**.
 
 **Common failures**
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| Task exit 1 + `pods "…-oldhash-…" not found` after rollout success | Wait race on terminating old pod | Verify with T2.5 commands; if Ready → **PASS**, go to T3 |
+| `ContainerCreating` + wait timeout; log shows `"openshift" = "upstream-certmanager"` | `DEPLOY_PROFILE` stayed `openshift` | Re-run with `DEPLOY_PROFILE=upstream-certmanager` on the **task CLI** (see T2.4). Do not edit taskfile. |
+| `secret "webhook-server-cert" not found` | Wrong profile / no Certificate | Same as above; confirm `kubectl get certificate,issuer -n openshift-dpu-operator` |
 | `ImagePullBackOff` | Hub private / wrong `REGISTRY` / nodes can’t pull | Public repo or pull secret; check image name on Hub |
 | `Unauthorized` on push | Not logged in to Hub | `buildah login docker.io` |
-| Looks for `/root/kubeconfig.ocpcluster` | Task var not overridden | Re-run with `KUBECONFIG_HOST="$HOST_KUBECONFIG"` on the **task CLI** (export alone is ignored) |
+| Looks for `/root/kubeconfig.ocpcluster` | Task var not overridden | Pass `KUBECONFIG_HOST="$HOST_KUBECONFIG"` on the **task CLI** |
 | Push to `hostname:5000` | `REGISTRY` unset | `export REGISTRY=docker.io/<user>` before `build-image-all` |
 | `task: command not found` | PATH | Install task or use `go run ./tools/task/task.go …` |
 
-**Paste Results / T2, then continue.**
+**Paste Results / T2 if you want a record, then continue to T3.**
 
 ---
 
@@ -343,21 +451,59 @@ make deploy IMG=$IMG
 
 ```bash
 kubectl get deploy,pods -n opi-nvidia-dpf-adapter-system -o wide
+kubectl get crd dpuoperatorconfigs.config.openshift.io \
+  dataprocessingunits.config.openshift.io \
+  servicefunctionchains.config.openshift.io
 kubectl logs -n opi-nvidia-dpf-adapter-system \
   deploy/opi-nvidia-dpf-adapter-controller-manager -c manager --tail=80
 ```
 
-**Expect:** pods Running; logs show Lifecycle Manager; no CrashLoop.  
-**Also required later:** this pod must reach `https://helm.ngc.nvidia.com`.
+**Expect**
 
-**Stop if:** ImagePullBackOff / CrashLoop / missing `sdk_helm_client.go` in the image source.
+- Deployment Available; manager + nvidia-vsp pods Running (no CrashLoop)
+- CRD `dpuoperatorconfigs` present (required for T4)
+- Logs may mention Lifecycle / controller start
+
+#### Watch errors for DataProcessingUnit / ServiceFunctionChain
+
+If logs repeat:
+
+```text
+Failed to watch … Kind=DataProcessingUnit … could not find the requested resource
+Failed to watch … Kind=ServiceFunctionChain … could not find the requested resource
+```
+
+that means those two CRDs are missing or still Terminating (common after `undeploy` raced apply). The adapter retries the watches.
+
+**For GOAL-01 / T4 (install `dpf-operator`):** you do **not** need to fix DPU/SFC first, as long as:
+
+```bash
+kubectl get crd dpuoperatorconfigs.config.openshift.io
+kubectl api-resources | grep -i dpuoperatorconfig
+```
+
+both work. T4 only creates a `DpuOperatorConfig`.
+
+**Optional (quiet the logs / restore T2 completeness):** re-apply OPI CRDs from the `dpu-operator` tree without undeploying the controller:
+
+```bash
+cd ~/dpu-operator
+HOST_KUBECONFIG="${KUBECONFIG:-/home/sridhar/.kube/config}"
+bin/kustomize build bin | KUBECONFIG="$HOST_KUBECONFIG" kubectl apply -f -
+# or only CRDs if bin/ is still the upstream-certmanager build from T2:
+kubectl apply -f config/crd/bases/
+kubectl get crd dataprocessingunits.config.openshift.io servicefunctionchains.config.openshift.io
+```
+
+Then wait ~30s; those Failed to watch lines should stop. If a CRD is stuck Terminating, clear finalizers only on that CRD, then re-apply.
+
+**Stop if:** ImagePullBackOff / CrashLoop / manager not Ready / `dpuoperatorconfigs` CRD missing.
 
 ---
 
 ## T4 — Apply enablement CR (triggers DPF install)
 
-Use the same contract as `opi-nvidia-dpf-adapter/config/samples/dpuoperatorconfig-nvidia.yaml`  
-(annotations + `spec.vendor` when the CRD accepts it):
+On this lab’s OPI CRD, **`spec.vendor` is not a field** (strict decoding rejects it). Use annotations only:
 
 ```bash
 kubectl apply -f - <<'EOF'
@@ -370,11 +516,10 @@ metadata:
     lifecycle.opi.nvidia.com/vendor-operator-version: v26.4.0
 spec:
   logLevel: 2
-  vendor: nvidia
 EOF
 ```
 
-If apply rejects `spec.vendor` (older CRD without that field), re-apply **without** the `vendor:` line; keep the annotations.
+(`opi-nvidia-dpf-adapter/config/samples/dpuoperatorconfig-nvidia.yaml` also has `spec.vendor`; that is for a newer CRD shape — do **not** use it on this cluster.)
 
 Wait 2–5 minutes:
 
@@ -395,20 +540,289 @@ kubectl logs -n opi-nvidia-dpf-adapter-system \
 | Namespace `dpf-operator-system` | exists |
 | `dpf-operator` controller Deployment | Ready |
 | DPF CRDs | present |
-| Adapter logs | `installed` (fresh) |
-| Conditions | `VendorOperatorSupported` not `Blocked` |
+| Adapter logs | `ensure installed` / `installed` (fresh) |
+| Conditions | `VendorOperatorSupported` present; not stuck with only OPI `Ready=FinalizerAdded` |
+
+#### Deadlock bug (hit on dh2 2026-11-05) — rebuild required
+
+Symptoms matched exactly:
+- K8s `v1.36.4+k3s1` OK; lease holder is a manager pod
+- CR has `lifecycle.opi.nvidia.com/cleanup` finalizer
+- **No** `VendorOperatorSupported` / no `ensure installed` log
+- No `dpf-operator-system`
+- Leader logs only DPU/SFC watch noise
+
+**Cause:** `HelmInstaller.Ensure` holds `defaultReleaseLocks`, then `SDKHelmClient.Install` tried to take the same mutex → permanent hang (same class of bug already documented on `ClaimRelease`).
+
+#### Fix 1 — deadlock (done on `:goal01-fix1`)
+
+`SDKHelmClient` must not re-acquire `defaultReleaseLocks` (nested mutex hang).
+
+#### Fix 2 — Helm cache path in code (`:goal01-fix2`) — done if image already that tag
+
+Code uses `/tmp/helm/…` instead of `/home/nonroot/.cache/helm`.
+
+#### Fix 3 — writable Helm volume (done if emptyDir `helm-cache` is mounted)
+
+#### Fix 4 — Helm installer RBAC (**no image rebuild**)
+
+```text
+cannot get resource "serviceaccounts" in API group "" in the namespace "dpf-operator-system"
+```
+
+Chart locate/install runs; SA lacks rights to create chart objects. Add
+`config/rbac/helm_installer_role.yaml` + binding.
+
+**Immediate on dh2** — chart also needs NFD (`nodefeaturerules.nfd.k8s-sigs.io`) and more.
+Replace the narrow role with full installer rights (avoids one-forbidden-resource-at-a-time):
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: opi-nvidia-dpf-adapter-helm-installer-role
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+- nonResourceURLs: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opi-nvidia-dpf-adapter-helm-installer-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opi-nvidia-dpf-adapter-helm-installer-role
+subjects:
+- kind: ServiceAccount
+  name: opi-nvidia-dpf-adapter-controller-manager
+  namespace: opi-nvidia-dpf-adapter-system
+EOF
+
+kubectl annotate dpuoperatorconfig dpu-operator-config \
+  lifecycle.opi.nvidia.com/reconcile="$(date -u +%Y%m%dT%H%M%SZ)" --overwrite
+
+# Wait 2–5 min
+kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p'
+kubectl get deploy,pods -n dpf-operator-system
+```
+
+VSP `CrashLoopBackOff` is **out of scope for GOAL-01** — managers Running is enough.
+
+Also confirm host can reach the chart repo (image has no shell/curl):
+
+```bash
+curl -sI https://helm.ngc.nvidia.com/nvidia/doca/ | head -20
+helm pull dpf-operator --repo https://helm.ngc.nvidia.com/nvidia/doca --version v26.4.0 --destination /tmp
+```
+
+#### If after 5–10 min (on a **fixed** image): no `dpf-operator-system`, and CR status only has OPI `Ready` / `FinalizerAdded`
+
+That means the adapter **started** reconcile (finalizer `lifecycle.opi.nvidia.com/cleanup` is present) but has **not** finished EnsureInstalled / status update. Do **not** re-apply the CR yet. Run **all** of these and paste Results:
+
+```bash
+# 1) Cluster minor — LCM requires Kubernetes minor v1.36 (v1.36.x+k3s OK)
+kubectl version
+
+# 2) Which manager pod is leader? (2 replicas; only leader runs LCM)
+kubectl -n opi-nvidia-dpf-adapter-system get lease
+kubectl -n opi-nvidia-dpf-adapter-system get pods -l control-plane=controller-manager
+
+# 3) Logs from BOTH manager pods (do not rely on `deploy/…` — that picks one pod)
+for p in $(kubectl -n opi-nvidia-dpf-adapter-system get pods -l control-plane=controller-manager -o name); do
+  echo "===== $p ====="
+  kubectl -n opi-nvidia-dpf-adapter-system logs "$p" -c manager --tail=200 \
+    | grep -iE 'lifecycle|ensure installed|helm|VendorOperator|Blocked|ngc|install|leader|error|fail' || true
+done
+
+# 4) Can the adapter reach NVIDIA NGC Helm?
+kubectl -n opi-nvidia-dpf-adapter-system exec deploy/opi-nvidia-dpf-adapter-controller-manager -c manager -- \
+  sh -c 'command -v wget >/dev/null && wget -S -O /dev/null https://helm.ngc.nvidia.com/nvidia/doca/ 2>&1 | head -40 || command -v curl >/dev/null && curl -sI https://helm.ngc.nvidia.com/nvidia/doca/ | head -20 || echo "no wget/curl in image"'
+
+# 5) Any Helm release / leftover secrets yet?
+kubectl get ns dpf-operator-system 2>/dev/null || echo "no dpf-operator-system"
+helm list -n dpf-operator-system 2>/dev/null || true
+kubectl get secrets -A | grep -i 'sh.helm.release' | grep -i dpf || echo "no dpf helm secrets"
+```
+
+**How to read it**
+
+| Observation | Meaning | Action |
+|---|---|---|
+| `VendorOperatorSupported=False` reason `Blocked`, message about Kubernetes minor | Cluster is not v1.36.x | Stop — GOAL-01 LCM pin requires 1.36; paste `kubectl version` |
+| `Blocked` missing cert-manager / argo-cd | Preflight | Fix Argo/cert-manager CRDs (baseline) |
+| Leader logs show Helm/NGC / timeout / dial errors | Chart pull failing | Fix egress/DNS/proxy to `helm.ngc.nvidia.com` |
+| Leader logs silent after finalizer; no `ensure installed` | Likely stuck inside Helm Ensure | Check NGC reachability; wait or restart **leader** pod once |
+| Only non-leader logs inspected | Misleading | Always use the `for p in …` loop above |
+| Leftover `*.provisioning.dpu.nvidia.com` CRDs, no namespace | Old lab CRDs (Helm keep) | OK for GOAL-01; LCM should still fresh-install the release |
 
 **If `Blocked`:** Argo/cert-manager CRDs missing — return to baseline.  
 **If Helm/NGC errors:** egress from adapter pod to NGC.  
-**If apply rejected:** paste full kubectl error into Results.
+**If apply rejected `spec.vendor`:** omit that field (annotations only).
+
+---
+
+## T5 — Stabilize Ready conditions (VendorOperatorReady, VendorDPUReady, VSP)
+
+Do these **in order**. Sync the latest `opi-nvidia-dpf-adapter` tree to dh2 first
+(sample YAML, Argo fallback fix, hardware-vsp image pin).
+
+### T5.1 — Apply singleton `DPFOperatorConfig` (sibling controllers)
+
+NVIDIA only deploys `dpf-provisioning-controller-manager` and
+`dpuservice-controller-manager` **after** this CR exists.
+
+```bash
+# Prefer the sample in the adapter tree:
+kubectl apply -f ~/opi-nvidia-dpf-adapter/config/samples/dpfoperatorconfig-lab.yaml
+
+# Equivalent inline:
+# kubectl apply -f - <<'EOF'
+# apiVersion: operator.dpu.nvidia.com/v1alpha1
+# kind: DPFOperatorConfig
+# metadata:
+#   name: dpfoperatorconfig
+#   namespace: dpf-operator-system
+# spec:
+#   overrides:
+#     argoCDNamespace: argocd
+#   staticClusterManager:
+#     disable: true
+#   kamajiClusterManager:
+#     disable: true
+# EOF
+```
+
+Argo must reconcile Applications in `dpf-operator-system`. If Apps stay
+OutOfSync / error, ensure Argo’s `application.namespaces` (or equivalent)
+includes `dpf-operator-system`.
+
+Wait and verify:
+
+```bash
+kubectl get dpfoperatorconfig -n dpf-operator-system
+kubectl rollout status -n dpf-operator-system \
+  deploy/dpf-provisioning-controller-manager \
+  deploy/dpuservice-controller-manager --timeout=300s
+kubectl get deploy,pods -n dpf-operator-system
+```
+
+### T5.2 — Redeploy adapter with Argo fallback fix (`:goal01-fix3`)
+
+Code now treats `argocd/argo-cd-argocd-server` as a valid Argo prerequisite
+([`pkg/lifecycle/status.go`](../opi-nvidia-dpf-adapter/pkg/lifecycle/status.go)).
+
+```bash
+cd ~/opi-nvidia-dpf-adapter
+grep -n 'argo-cd-argocd-server' pkg/lifecycle/status.go
+# Must list argocd fallbacks. If missing: sync tree from workstation.
+
+export IMG=docker.io/sknrao/opi-nvidia-dpf-adapter:goal01-fix3
+make docker-build docker-push IMG=$IMG
+make deploy IMG=$IMG
+# Re-apply helm-cache volume + helm-installer RBAC if make deploy resets them
+# (emptyDir helm-cache is in config/manager/manager.yaml; helm_installer_* in config/rbac).
+
+kubectl -n opi-nvidia-dpf-adapter-system rollout status \
+  deploy/opi-nvidia-dpf-adapter-controller-manager
+```
+
+Nudge LCM and check conditions:
+
+```bash
+kubectl annotate dpuoperatorconfig dpu-operator-config \
+  lifecycle.opi.nvidia.com/reconcile="$(date -u +%Y%m%dT%H%M%SZ)" --overwrite
+sleep 15
+kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p'
+```
+
+**Want:** `VendorOperatorReady` → `True` / `Ready` (after T5.1 + T5.2).
+
+### T5.3 — Fix VSP CrashLoop (hardware overlay)
+
+Default VSP is kind/mock. Lab BlueField needs the hardware overlay.
+
+```bash
+# 1) Which container fails (before overlay)
+kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
+kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c vsp --tail=80 || true
+kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c opi-daemon --tail=80 || true
+
+# 2) Node label required by overlay nodeSelector
+kubectl label node dh2 hardware.opiproject.org/profile=nvidia-bluefield --overwrite
+
+# 3) Apply hardware VSP (overlay pins goal01-fix3 — keep in sync with T5.2 IMG)
+cd ~/opi-nvidia-dpf-adapter
+# Confirm pin:
+grep -A2 'newName:' config/overlays/hardware-vsp/kustomization.yaml
+kustomize build config/overlays/hardware-vsp | kubectl apply -f -
+# Or: kubectl apply -k config/overlays/hardware-vsp
+
+kubectl -n opi-nvidia-dpf-adapter-system rollout status ds/opi-nvidia-dpf-adapter-nvidia-vsp --timeout=180s
+kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
+```
+
+**Expect:** VSP pod Ready (hardware overlay drops opi-daemon sidecar; single `vsp` container).  
+**Stop if:** CrashLoop continues — paste `kubectl describe` + logs; check `lspci -nn | grep 15b3` and `/sys` mounts.
+
+### T5.4 — Host reset for `VendorDPUReady` (NVCONFIG / SystemLevelReset)
+
+Adapter **will not** reboot the host. DPU `dpf-operator-system/dh2-bluefield-2`
+reports pending NVCONFIG and `SystemLevelReset`.
+
+```bash
+kubectl -n dpf-operator-system get dpu dh2-bluefield-2 -o yaml | tee /tmp/dpu-before-reset.yaml
+kubectl -n dpf-operator-system get dpu dh2-bluefield-2 \
+  -o jsonpath='{.status.phase}{" method="}{.status.agentStatus.rebootMethod}{" rebootPhase="}{.status.rebootStatus.phase}{"\n"}'
+kubectl -n dpf-operator-system get dpu dh2-bluefield-2 \
+  -o jsonpath='{.metadata.annotations.provisioning\.dpu\.nvidia\.com/host-power-cycle-required}{"\n"}'
+```
+
+Then on **dh2** (maintenance window):
+
+1. Ensure DPF host-agent / provisioning has applied or queued NVCONFIG (see DPU status `lastObservedPendingNvconfig`).
+2. Perform the reset DPF requests for method **`SystemLevelReset`** (typically host reboot, or the NVIDIA-documented `mlxfwreset` / firmware reset for this mode — follow the method named on the DPU object, not a guess).
+3. After the node rejoins the cluster:
+
+```bash
+kubectl get nodes
+kubectl -n dpf-operator-system get dpu dh2-bluefield-2 -o wide
+# Wait until phase Ready / rebootStatus Succeeded (not Rebooting)
+
+kubectl annotate dpuoperatorconfig dpu-operator-config \
+  lifecycle.opi.nvidia.com/reconcile="$(date -u +%Y%m%dT%H%M%SZ)" --overwrite
+kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p'
+```
+
+**Want:** `VendorDPUReady=True` / `Ready`.
+
+### T5.5 — Final gate
+
+```bash
+kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p'
+kubectl get deploy,pods -n dpf-operator-system
+kubectl get pods -n opi-nvidia-dpf-adapter-system
+```
+
+| Check | Want |
+|---|---|
+| `VendorOperatorSupported` | True |
+| `VendorOperatorReady` | True / Ready |
+| `VendorDPUReady` | True / Ready |
+| DPF sibling Deployments | Available |
+| VSP | Running / Ready |
 
 ---
 
 ## Out of scope for GOAL-01
 
 - Kubernetes on the DPU ARM  
-- `DataProcessingUnit` / `ServiceFunctionChain`  
-- Traffic validation  
+- `DataProcessingUnit` / `ServiceFunctionChain` traffic validation beyond VSP Ready  
+- Faking `VendorDPUReady` without completing NVCONFIG/reset  
 
 ---
 
@@ -455,9 +869,19 @@ kubectl logs -n opi-nvidia-dpf-adapter-system \
 # paste: relevant adapter logs
 ```
 
+### T5
+
+```text
+# paste: DPFOperatorConfig apply + sibling rollout
+# paste: IMG=goal01-fix3 deploy
+# paste: VSP pods after hardware overlay
+# paste: DPU status before/after host reset
+# paste: final conditions + get pods
+```
+
 ### Verdict
 
-- [ ] PASS  
+- [ ] PASS — all T5.5 gates  
 - [ ] FAIL — describe  
 
 ```text
