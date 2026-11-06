@@ -2,14 +2,7 @@
 
 **Lab host:** `dh2`  
 **Depends on:** GOAL-01 PASS (dpf-operator via LCM; Vendor* True; hardware VSP Ready)  
-**Where you are:** Docs + sample + `goal02-observe.sh` ready. Sync adapter (incl. `config/samples/dataprocessingunit-bf2-lab.yaml`) to dh2, then run **T1** or:
-
-```bash
-cd ~/opi-dpu-operator-with-nvidia/working-directory   # or copy goal02-observe.sh
-chmod +x goal02-observe.sh
-ADAPTER_DIR=~/opi-nvidia-dpf-adapter ./goal02-observe.sh
-# paste goal02-results.txt into Results below
-```
+**Where you are (2026-11-06):** Goal-02 Observe **PASS** on dh2 (clean rerun 10:34Z after DPU/BFB unstick). VSP stamp + BF2 status + zero Create. OPI `Ready` still absent (hardware VSP has no opi-daemon handshake) — acceptable for Observe.
 
 ---
 
@@ -168,48 +161,52 @@ Document the correlation (same node / serial if DPF still has an object; or “D
 
 ### Meta
 
-- Date / time: 2026-11-06 (docs/sample/script landed; lab execute pending on dh2)
-- Adapter IMG / VSP overlay: goal01-fix3 / hardware-vsp (from Goal-01)
+- Date / time: 2026-11-06T10:34:04Z (clean rerun; prior 10:27Z had Deleting junk)
+- Adapter IMG / VSP overlay: goal01-fix3 / hardware-vsp
 - OPI DPU name: `dh2-bluefield-2`
-- Agent note: workstation cannot resolve `dh2` / no local `kubectl` — run `goal02-observe.sh` on the lab host and paste output here.
 
 ### T1 — DPF inventory before
 
 ```text
-# paste from goal02-results.txt (T1 section) or kubectl get …
+only dpuflavor/dpf-default-flavor (12d leftover)
+no dpu / bfb / dpudevice
+VendorDPUReady=Unknown ("no NVIDIA DPU objects observed")
 ```
 
 ### T2 — Apply OPI DPU
 
 ```text
-# paste
+dataprocessingunit/dh2-bluefield-2 created (BlueField-2, node=dh2)
 ```
 
 ### T3 — Annotations + conditions
 
 ```text
-# paste
+product=BlueField-2 serial=MT2321XZ0KVX pci=0000-0f-00 bfb-url stamped
+DPFReady=False/UnsupportedHardware
+DPFHardwareCompatible=False/UnsupportedHardware
+Ready: ABSENT (expected — hardware VSP without opi-daemon handshake)
+VSP: stamped hardware identity serial=MT2321XZ0KVX product=BlueField-2 pci=0000:0f:00.0
 ```
 
 ### T4 — No Create
 
 ```text
-# paste
+PASS — still only pre-existing dpuflavor; no new DPU/BFB/DPUDevice
 ```
 
 ### T5 — Correlation
 
 ```text
-# paste
+OPI fully identified lab card; no live DPF DPU to pair (clean) — Observe does not require one
 ```
 
 ### Verdict
 
-- [ ] PASS — Observe gates met; no Create
-- [ ] FAIL — describe
-- [ ] PENDING — lab paste from `goal02-observe.sh` (agent has no API to dh2)
+- [x] PASS — Observe on BF2 (VSP + status + no Create), clean inventory
+- [ ] FAIL
 
 ```text
-Deliverables complete: runbook, BF2 sample, user-guide M2, observe script.
-Execute on dh2: sync tree → ./goal02-observe.sh → paste goal02-results.txt.
+dh2 Goal-02 PASS. Goal-01 on dh2 = LCM/Helm + VSP; VendorDPUReady Unknown with no DPU is honest.
+Next: Goal-01→02→03 on dh5 (BF-3).
 ```

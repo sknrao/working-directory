@@ -1,7 +1,7 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
 **Lab host:** `dh2`  
-**Where you are (2026-11-06):** **GOAL-01 PASS.** T5.5 gates met on dh2 after SLR (`mlxfwreset -l 4 --sync 0`). Vendor* all True; OPI `Ready=False` expected (host-only); ignore kamaji defrag Job.
+**Where you are (2026-11-06):** **GOAL-01 PARTIAL on dh2.** LCM/Helm path is proven (`VendorOperatorSupported` + `VendorOperatorReady` True; siblings Available; hardware VSP Ready). **`VendorDPUReady=True` was vacuous** — DPF `DPU`/`BFB` stuck `Deleting` for days; observer treated “not Rebooting” as Ready. Observer fixed to require phase Ready / reject Deleting (redeploy adapter). Full Goal-01 DPU Ready → **re-prove on dh5 (BF-3)** after clean inventory.
 
 ---
 
@@ -932,7 +932,7 @@ kubectl get pods -n opi-nvidia-dpf-adapter-system
 |---|---|
 | `VendorOperatorSupported` | True |
 | `VendorOperatorReady` | True / Ready |
-| `VendorDPUReady` | True / Ready |
+| `VendorDPUReady` | True / Ready **and** live DPF `DPU` phase=`Ready` (not Deleting / Unknown) |
 | OPI `Ready` | May stay **False** / `FinalizerAdded` on host-only GOAL-01 (daemon-owned; not a Vendor fail) |
 | DPF sibling Deployments | Available (`provisioning` + `dpuservice`) |
 | VSP | Running / Ready (`1/1`, container=`vsp`) |
