@@ -676,35 +676,59 @@ Do these **in order**. Sync the latest `opi-nvidia-dpf-adapter` tree to dh2 firs
 NVIDIA only deploys `dpf-provisioning-controller-manager` and
 `dpuservice-controller-manager` **after** this CR exists.
 
-```bash
-# Prefer the sample in the adapter tree:
-kubectl apply -f ~/opi-nvidia-dpf-adapter/config/samples/dpfoperatorconfig-lab.yaml
+**If apply warns `currently being deleted`:** do **not** wait on rollout.
+Unstick first:
 
-# Equivalent inline:
-# kubectl apply -f - <<'EOF'
-# apiVersion: operator.dpu.nvidia.com/v1alpha1
-# kind: DPFOperatorConfig
-# metadata:
-#   name: dpfoperatorconfig
-#   namespace: dpf-operator-system
-# spec:
-#   overrides:
-#     argoCDNamespace: argocd
-#   staticClusterManager:
-#     disable: true
-#   kamajiClusterManager:
-#     disable: true
-# EOF
+```bash
+kubectl -n dpf-operator-system get dpfoperatorconfig dpfoperatorconfig -o yaml | head -40
+# If deletionTimestamp is set:
+kubectl -n dpf-operator-system patch dpfoperatorconfig dpfoperatorconfig \
+  --type=merge -p '{"metadata":{"finalizers":[]}}'
+kubectl -n dpf-operator-system delete dpfoperatorconfig dpfoperatorconfig --ignore-not-found --wait=false
+# Wait until gone:
+kubectl -n dpf-operator-system get dpfoperatorconfig
+```
+
+Then apply (sample or inline — must include `provisioningController`):
+
+```bash
+kubectl apply -f ~/opi-nvidia-dpf-adapter/config/samples/dpfoperatorconfig-lab.yaml
+# Or:
+kubectl apply -f - <<'EOF'
+apiVersion: operator.dpu.nvidia.com/v1alpha1
+kind: DPFOperatorConfig
+metadata:
+  name: dpfoperatorconfig
+  namespace: dpf-operator-system
+spec:
+  overrides:
+    argoCDNamespace: argocd
+  provisioningController:
+    dmsTimeout: 900
+    installInterface:
+      installViaHostAgent: {}
+  staticClusterManager:
+    disable: true
+  kamajiClusterManager:
+    disable: true
+EOF
+```
+
+Confirm the object is **not** terminating:
+
+```bash
+kubectl -n dpf-operator-system get dpfoperatorconfig dpfoperatorconfig -o jsonpath='{.metadata.deletionTimestamp}{" finalizers="}{.metadata.finalizers}{"\n"}'
+kubectl -n dpf-operator-system get dpfoperatorconfig -o wide
 ```
 
 Argo must reconcile Applications in `dpf-operator-system`. If Apps stay
-OutOfSync / error, ensure Argo’s `application.namespaces` (or equivalent)
-includes `dpf-operator-system`.
+OutOfSync / error, ensure Argo’s `application.namespaces` includes that NS.
 
-Wait and verify:
+Then wait (only after a live, non-deleting config):
 
 ```bash
-kubectl get dpfoperatorconfig -n dpf-operator-system
+kubectl get deploy -n dpf-operator-system
+kubectl logs -n dpf-operator-system deploy/dpf-operator-controller-manager --tail=80
 kubectl rollout status -n dpf-operator-system \
   deploy/dpf-provisioning-controller-manager \
   deploy/dpuservice-controller-manager --timeout=300s
