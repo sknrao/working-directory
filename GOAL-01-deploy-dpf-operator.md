@@ -1,7 +1,7 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
 **Lab host:** `dh2`  
-**Where you are (2026-11-06):** Helm install OK (`VendorOperatorSupported=True`, `dpf-operator-controller-manager` Running). **Next: T5** — make `VendorOperatorReady` + `VendorDPUReady` True and clear VSP CrashLoop.
+**Where you are (2026-11-06):** **GOAL-01 PASS.** T5.5 gates met on dh2 after SLR (`mlxfwreset -l 4 --sync 0`). Vendor* all True; OPI `Ready=False` expected (host-only); ignore kamaji defrag Job.
 
 ---
 
@@ -728,31 +728,49 @@ Then wait (only after a live, non-deleting config):
 
 ```bash
 kubectl get deploy -n dpf-operator-system
-kubectl logs -n dpf-operator-system deploy/dpf-operator-controller-manager --tail=80
 kubectl rollout status -n dpf-operator-system \
   deploy/dpf-provisioning-controller-manager \
   deploy/dpuservice-controller-manager --timeout=300s
 kubectl get deploy,pods -n dpf-operator-system
 ```
 
+**T5.1 PASS when:** `dpf-provisioning-controller-manager` and
+`dpuservice-controller-manager` are **Available**.
+
+**Do not block** on `DPFOperatorConfig` `Ready=False` / `PHASE=Pending`.
+Operator logs often show DPUServices (multus, flannel, …) “not ready” until
+DPU provisioning advances — that is separate from the LCM sibling-Deploy gate.
+`kamaji-etcd-defrag-job` stuck in ContainerCreating can be ignored for GOAL-01.
+
 ### T5.2 — Redeploy adapter with Argo fallback fix (`:goal01-fix3`)
 
-Code now treats `argocd/argo-cd-argocd-server` as a valid Argo prerequisite
+Code treats `argocd/argo-cd-argocd-server` as a valid Argo prerequisite
 ([`pkg/lifecycle/status.go`](../opi-nvidia-dpf-adapter/pkg/lifecycle/status.go)).
+
+**Shell env (new terminal):**
+
+```bash
+export PATH=/usr/local/go/bin:$(go env GOPATH)/bin:$PATH
+export KUBECONFIG=/home/sridhar/.kube/config
+export IMG=docker.io/sknrao/opi-nvidia-dpf-adapter:goal01-fix3
+docker login docker.io
+```
 
 ```bash
 cd ~/opi-nvidia-dpf-adapter
 grep -n 'argo-cd-argocd-server' pkg/lifecycle/status.go
 # Must list argocd fallbacks. If missing: sync tree from workstation.
 
-export IMG=docker.io/sknrao/opi-nvidia-dpf-adapter:goal01-fix3
 make docker-build docker-push IMG=$IMG
 make deploy IMG=$IMG
-# Re-apply helm-cache volume + helm-installer RBAC if make deploy resets them
-# (emptyDir helm-cache is in config/manager/manager.yaml; helm_installer_* in config/rbac).
+# helm-cache emptyDir + helm-installer ClusterRole ship in config/manager + config/rbac
 
 kubectl -n opi-nvidia-dpf-adapter-system rollout status \
   deploy/opi-nvidia-dpf-adapter-controller-manager
+kubectl -n opi-nvidia-dpf-adapter-system get deploy \
+  opi-nvidia-dpf-adapter-controller-manager \
+  -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+# must print …:goal01-fix3
 ```
 
 Nudge LCM and check conditions:
@@ -764,65 +782,143 @@ sleep 15
 kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p'
 ```
 
-**Want:** `VendorOperatorReady` → `True` / `Ready` (after T5.1 + T5.2).
+**T5.2 PASS when:** `VendorOperatorReady` is `True` / `Ready`
+(message like `DPF CRDs, controllers, and prerequisites are healthy`).
+`VendorDPUReady=Rebooting` is expected until T5.4.
 
 ### T5.3 — Fix VSP CrashLoop (hardware overlay)
 
-Default VSP is kind/mock. Lab BlueField needs the hardware overlay.
+Default `make deploy` VSP is kind/mock (**2 containers**: `vsp` + `opi-daemon`).
+Lab BlueField needs the hardware overlay (**1 container**: `vsp` only).
+
+**Important (dh2 facts):**
+- System `kustomize` may be missing — use **`./bin/kustomize`** from the adapter repo
+  (or `kubectl apply -k`).
+- Mock `opi-daemon` CrashLoops if OPI `DataProcessingUnit` / `ServiceFunctionChain`
+  CRDs were deleted during earlier undeploy races — re-apply them **before** or with
+  the overlay.
+- `kubectl label … not labeled` with the label still showing in `--show-labels` means
+  the value was **already set** (success).
 
 ```bash
-# 1) Which container fails (before overlay)
+# 0) Restore OPI DPU/SFC CRDs (required if api-resources lacks DataProcessingUnit)
+kubectl apply -f ~/dpu-operator/config/crd/bases/
+kubectl api-resources | grep -E 'dataprocessingunit|servicefunctionchain'
+
+# 1) Optional: see current failure mode
 kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
-kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c vsp --tail=80 || true
-kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c opi-daemon --tail=80 || true
+kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c vsp --tail=40 || true
+kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c opi-daemon --tail=40 || true
 
 # 2) Node label required by overlay nodeSelector
 kubectl label node dh2 hardware.opiproject.org/profile=nvidia-bluefield --overwrite
+kubectl get node dh2 --show-labels | tr ',' '\n' | grep hardware.opiproject
 
-# 3) Apply hardware VSP (overlay pins goal01-fix3 — keep in sync with T5.2 IMG)
+# 3) Apply hardware VSP (pin must match T5.2 IMG = goal01-fix3)
 cd ~/opi-nvidia-dpf-adapter
-# Confirm pin:
 grep -A2 'newName:' config/overlays/hardware-vsp/kustomization.yaml
-kustomize build config/overlays/hardware-vsp | kubectl apply -f -
-# Or: kubectl apply -k config/overlays/hardware-vsp
+./bin/kustomize build config/overlays/hardware-vsp | kubectl apply -f -
+# Fallback if ./bin/kustomize missing:
+#   kubectl apply -k config/overlays/hardware-vsp
 
+# 4) Force new pod and verify 1/1 + containers=vsp only
+kubectl -n opi-nvidia-dpf-adapter-system delete pod -l app.kubernetes.io/component=vsp --wait=false
 kubectl -n opi-nvidia-dpf-adapter-system rollout status ds/opi-nvidia-dpf-adapter-nvidia-vsp --timeout=180s
 kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
+kubectl -n opi-nvidia-dpf-adapter-system get pod -l app.kubernetes.io/component=vsp \
+  -o jsonpath='{range .items[*]}{.metadata.name}{" containers="}{.spec.containers[*].name}{"\n"}{end}'
 ```
 
-**Expect:** VSP pod Ready (hardware overlay drops opi-daemon sidecar; single `vsp` container).  
-**Stop if:** CrashLoop continues — paste `kubectl describe` + logs; check `lspci -nn | grep 15b3` and `/sys` mounts.
+**T5.3 PASS when:**
+- Pod `1/1 Running` (not `2/2` — that is still mock)
+- `containers=vsp` only
+- Image tag `goal01-fix3`
 
-### T5.4 — Host reset for `VendorDPUReady` (NVCONFIG / SystemLevelReset)
+**Stop if:** CrashLoop after overlay — `kubectl describe` + `lspci -nn | grep 15b3`; confirm `/sys` hostPath.
 
-Adapter **will not** reboot the host. DPU `dpf-operator-system/dh2-bluefield-2`
-reports pending NVCONFIG and `SystemLevelReset`.
+### T5.4 — `VendorDPUReady` (optional for GOAL-01 if you refuse host reset)
+
+**What this step is**
+
+DPF wrote firmware NVCONFIG changes (`LAG_RESOURCE_ALLOCATION`, `NUM_OF_VFS`, …)
+onto the BlueField. Those take effect only after a **System-Level Reset (SLR)**.
+The OPI adapter **observes** that and sets `VendorDPUReady=False/Rebooting`.
+It **never** runs the reset for you.
+
+**What you do *not* do**
+
+- No `kubectl apply` / annotate / patch will flip `VendorDPUReady` to True.
+- Do **not** delete the DPU CR or fake status — DPF will recreate / re-stall.
+
+**What you *do* (only if you accept a host outage)**
+
+1. **Inspect** (safe — read-only):
 
 ```bash
 kubectl -n dpf-operator-system get dpu dh2-bluefield-2 -o yaml | tee /tmp/dpu-before-reset.yaml
 kubectl -n dpf-operator-system get dpu dh2-bluefield-2 \
-  -o jsonpath='{.status.phase}{" method="}{.status.agentStatus.rebootMethod}{" rebootPhase="}{.status.rebootStatus.phase}{"\n"}'
+  -o jsonpath='phase={.status.phase} method={.status.agentStatus.rebootMethod} rebootPhase={.status.rebootStatus.phase}{"\n"}'
 kubectl -n dpf-operator-system get dpu dh2-bluefield-2 \
-  -o jsonpath='{.metadata.annotations.provisioning\.dpu\.nvidia\.com/host-power-cycle-required}{"\n"}'
+  -o jsonpath='powerCycleAnn={.metadata.annotations.provisioning\.dpu\.nvidia\.com/host-power-cycle-required}{"\n"}'
+# Pending NVCONFIG (what DPF wants applied):
+kubectl -n dpf-operator-system get dpu dh2-bluefield-2 \
+  -o jsonpath='{.status.agentStatus.lastObservedPendingNvconfig}{"\n"}'
 ```
 
-Then on **dh2** (maintenance window):
+2. **Decide which reset path DPF asked for**
 
-1. Ensure DPF host-agent / provisioning has applied or queued NVCONFIG (see DPU status `lastObservedPendingNvconfig`).
-2. Perform the reset DPF requests for method **`SystemLevelReset`** (typically host reboot, or the NVIDIA-documented `mlxfwreset` / firmware reset for this mode — follow the method named on the DPU object, not a guess).
-3. After the node rejoins the cluster:
+| Signal on DPU object | Meaning | Action |
+|---|---|---|
+| annotation `host-power-cycle-required=true` | Cold power cycle | Full power off/on of the server (worst for k3s) |
+| `rebootMethod=SystemLevelReset` and no power-cycle ann | NVIDIA SLR | Prefer `mlxfwreset` warm path below; plain `reboot` is the fallback |
+| `rebootMethod=FirmwareReset` | Firmware / PCI reset | `mlxfwreset` at the level DPF/host-agent documents |
+
+3. **If you proceed — NVIDIA SLR (NIC-mode style warm path, preferred over blind `reboot`)**
+
+On **dh2**, as root, with MFT tools installed (`mst` / `mlxfwreset`):
+
+```bash
+# Find the BlueField MST device
+mst start
+ls /dev/mst/
+# Example device name — use yours from ls:
+DEV=/dev/mst/mt41686_pciconf0   # adjust
+
+# Query supported reset levels
+mlxfwreset -d "$DEV" q
+
+# System-level reset (level 4) — this restarts host drivers / PCI and
+# typically takes the host OS down briefly (same risk class as reboot).
+mlxfwreset -d "$DEV" -y -l 4 r
+```
+
+If `mlxfwreset` is missing or reports Not Supported for level 4, the NVIDIA
+fallback for SystemLevelReset is a normal host `reboot`.
+
+**k3s risk (why you may refuse):** dh2 is a single-node k3s control plane.
+Any SLR / reboot drops the API until the node is back. Usually k3s returns
+cleanly if the disk is healthy; there is no guarantee from this runbook.
+Have console/BMC access before you start.
+
+4. **After the node is back**
 
 ```bash
 kubectl get nodes
 kubectl -n dpf-operator-system get dpu dh2-bluefield-2 -o wide
-# Wait until phase Ready / rebootStatus Succeeded (not Rebooting)
+# Want: phase Ready (or rebootStatus.phase=Succeeded), not Rebooting
 
 kubectl annotate dpuoperatorconfig dpu-operator-config \
   lifecycle.opi.nvidia.com/reconcile="$(date -u +%Y%m%dT%H%M%SZ)" --overwrite
+sleep 20
 kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p'
 ```
 
-**Want:** `VendorDPUReady=True` / `Ready`.
+**T5.4 PASS:** `VendorDPUReady=True` / `Ready`.
+
+**T5.4 DEFER (allowed for GOAL-01 if you will not reset):** keep
+`VendorDPUReady=False/Rebooting`, save `/tmp/dpu-before-reset.yaml`, and treat
+GOAL-01 success as **Helm/LCM path proven** (`VendorOperatorSupported` +
+`VendorOperatorReady` + VSP Ready). Do **not** patch the condition True.
 
 ### T5.5 — Final gate
 
@@ -837,8 +933,11 @@ kubectl get pods -n opi-nvidia-dpf-adapter-system
 | `VendorOperatorSupported` | True |
 | `VendorOperatorReady` | True / Ready |
 | `VendorDPUReady` | True / Ready |
-| DPF sibling Deployments | Available |
-| VSP | Running / Ready |
+| OPI `Ready` | May stay **False** / `FinalizerAdded` on host-only GOAL-01 (daemon-owned; not a Vendor fail) |
+| DPF sibling Deployments | Available (`provisioning` + `dpuservice`) |
+| VSP | Running / Ready (`1/1`, container=`vsp`) |
+| `kamaji-etcd-defrag-job` | Ignore ContainerCreating (kamaji disabled) |
+| DPU CR phase | May show `Deleting` briefly after SLR; re-check — not a VendorDPUReady fail if condition is True |
 
 ---
 
@@ -896,20 +995,30 @@ kubectl get pods -n opi-nvidia-dpf-adapter-system
 ### T5
 
 ```text
-# paste: DPFOperatorConfig apply + sibling rollout
-# paste: IMG=goal01-fix3 deploy
-# paste: VSP pods after hardware overlay
-# paste: DPU status before/after host reset
-# paste: final conditions + get pods
+# T5.4: mlxfwreset -d /dev/mst/mt41686_pciconf0 -y -l 4 --sync 0 r
+# (first attempt without --sync 0 → fsm sync timed out)
+
+# T5.5 (2026-11-06) conditions:
+# Ready=False FinalizerAdded (expected host-only)
+# VendorOperatorSupported=True Supported
+# VendorOperatorReady=True Ready
+# VendorDPUReady=True Ready ("NVIDIA DPU objects are not in Rebooting")
+
+# dpf-operator-system Deployments: controller 1/1, provisioning 2/2, dpuservice 1/1
+# pods: bfb-registry, dh2-dms, managers Running; kamaji-etcd-defrag-job ContainerCreating (ignore)
+# opi-nvidia-dpf-adapter-system: 2x controller-manager Running, nvidia-vsp 1/1 Running
+# node dh2 Ready after SLR
 ```
 
 ### Verdict
 
-- [ ] PASS — all T5.5 gates  
+- [x] PASS — all T5.5 gates  
 - [ ] FAIL — describe  
 
 ```text
-
+GOAL-01 PASS on dh2: dpf-operator v26.4.0 installed via OPI LCM/adapter Helm path;
+VendorOperatorSupported + VendorOperatorReady + VendorDPUReady True; hardware VSP Ready.
+OPI Ready remains False (daemon-owned). Kamaji defrag Job ignored (kamaji disabled).
 ```
 
 ---

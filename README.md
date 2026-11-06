@@ -5,7 +5,8 @@ Scratch space for OPI ↔ NVIDIA DPF bring-up.
 
 | File | Purpose |
 |---|---|
-| [GOAL-01-deploy-dpf-operator.md](GOAL-01-deploy-dpf-operator.md) | First goal: install `dpf-operator` via OPI + adapter. **Start at Tools checklist → T2** (cleanup/Argo already done on dh2). No assumed tools: Go 1.26.10, buildah/podman, Docker Hub login, Task `KUBECONFIG_HOST=` CLI override. |
+| [GOAL-01-deploy-dpf-operator.md](GOAL-01-deploy-dpf-operator.md) | Goal 1: install `dpf-operator` via OPI + adapter. **PASS** on dh2. |
+| [GOAL-02-observe-dpu.md](GOAL-02-observe-dpu.md) | Goal 2: Observe OPI `DataProcessingUnit` + VSP + status; **no Create**. Start at T1 or run [goal02-observe.sh](goal02-observe.sh). |
 
 How we use it:
 
