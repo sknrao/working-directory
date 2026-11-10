@@ -2,9 +2,9 @@
 
 **Hosts:**
 - `dh2` (BlueField-**2**) — LCM/Helm + VSP proven; `VendorDPUReady` incomplete (DPF 26.4 does not support BF-2 Create). Parked.
-- **`dh5` (BlueField-3) — next full Goal-01** (supported DPF hardware).
+- **`dh5` (BlueField-3 B3220) — active Goal-01.** P0–P4 largely PASS (2026-11-10); see gate note on **Kubernetes minor**.
 
-**Where you are:** Before T2 on a **new** host, complete **Prerequisites (P0–P4)** below. Do not assume tools or cluster apps from dh2.
+**Where you are:** P0–P4 done on dh5. **Before / during T2:** confirm `kubectl version` **server** is **v1.36.x**. Client showed `v1.37.2+k3s1` — if the apiserver is also 1.37, LCM will `Blocked` at T4 until you install k3s **1.36.x** or bump the adapter pin. Then start **T2**.
 
 Replace `<NODE>` with the Kubernetes node name (e.g. `dh5`).
 
@@ -217,6 +217,7 @@ kubectl version
 |---|---|---|
 | **cert-manager** | `cert-manager` | CRD `certificates.cert-manager.io`; webhook + controller pods Running |
 | **Argo CD** | **`argocd`** | CRD `applications.argoproj.io`; server + repo-server + application-controller Running |
+| **Node Feature Discovery (NFD)** | e.g. `node-feature-discovery` | CRD `nodefeaturerules.nfd.k8s-sigs.io` (`NodeFeatureRule`) — **required** for `dpf-operator` Helm manifest (`dpu-detection-rule`). Missing → `VendorOperatorReady=Degraded` |
 | Kubernetes | — | Adapter pin: minor **v1.36.x** (lab used `v1.36.4+k3s1`). DPF docs also list a wider range — **this adapter blocks non-1.36**. |
 | Kamaji | — | **Not** required for GOAL-01 Host-Trusted / `installViaHostAgent` with kamaji disabled |
 
@@ -242,6 +243,17 @@ kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 helm upgrade --install argo-cd argo/argo-cd -n argocd --wait
 kubectl get pods -n argocd
 kubectl get crd applications.argoproj.io
+```
+
+**Node Feature Discovery** (needed before LCM can Helm-install `dpf-operator`):
+
+```bash
+helm repo add nfd https://kubernetes-sigs.github.io/node-feature-discovery/charts
+helm repo update
+helm upgrade --install node-feature-discovery nfd/node-feature-discovery \
+  --namespace node-feature-discovery --create-namespace --wait
+kubectl get crd nodefeaturerules.nfd.k8s-sigs.io
+kubectl get pods -n node-feature-discovery
 ```
 
 **Do not** install `dpf-operator` with Helm yourself — that is the LCM’s job in T4.
@@ -351,9 +363,15 @@ buildah login --get-login docker.io
 
 You still only **export** here. The `KUBECONFIG_HOST=…` override is applied in **T2.4** on the task line — still without touching `taskfile.yaml`.
 
-### T2.3 — Build and push images
+### T2.3 — Build and push images (skip if Hub already has them)
 
-`deploy-upstream-certmanager-1c` does **not** build images. You must build+push first.
+`deploy-1c` does **not** build images; it pulls `$REGISTRY/…:dev`.
+
+**Reuse (preferred on a second host like dh5):** if you already pushed from dh2
+(`docker.io/<user>/dpu-operator:dev`, `dpu-daemon:dev`, …), **skip**
+`build-image-all` and go to T2.4 with the same `REGISTRY`.
+
+**Build only when Hub is missing those tags:**
 
 ```bash
 cd ~/dpu-operator
@@ -367,6 +385,13 @@ task build-image-all
 What this does: compiles binaries, `buildah` builds images, `buildah manifest push` to `docker://$REGISTRY/…:dev`.
 
 **Expect:** exit 0. First run can take a long time.
+
+**Known fail on some Ubuntu hosts:**
+`bind mounts cannot have any filesystem-specific options applied` during
+`buildah build … -v …:/go:z` — runc rejects the SELinux `:z` flag. That is a
+**local build tooling** issue, not a cluster failure. Workaround: build/push on
+a host where buildah works (e.g. dh2), or fix/remove the `:z` volume opt in the
+Task helper; then deploy on the target with the same `REGISTRY`.
 
 **Stop if:** missing `buildah`/`podman`/Go — return to tools checklist.  
 **Stop if:** push Unauthorized — `buildah login docker.io` again.  
@@ -474,16 +499,24 @@ kubectl get crd dpuoperatorconfigs.config.openshift.io
 kubectl get crd dataprocessingunits.config.openshift.io
 kubectl get crd servicefunctionchains.config.openshift.io
 kubectl get deploy,pods -n openshift-dpu-operator -o wide
-kubectl -n openshift-dpu-operator get certificate,issuer,secret webhook-server-cert
+# Secret is named webhook-server-cert; Certificate/Issuer use different names:
+kubectl -n openshift-dpu-operator get certificate,issuer
+kubectl -n openshift-dpu-operator get secret webhook-server-cert
 kubectl -n openshift-dpu-operator get deploy dpu-operator-controller-manager
 ```
+
+**Do not** use `kubectl get certificate,issuer,secret webhook-server-cert` —
+that applies the name `webhook-server-cert` to **all** kinds. Issuer/Certificate
+are typically `dpu-operator-selfsigned-issuer` / `dpu-operator-serving-cert`;
+only the **Secret** is `webhook-server-cert`. `NotFound` on Certificate/Issuer
+under that name is expected and **not** a failure.
 
 **Expect**
 
 - Namespace `openshift-dpu-operator` exists  
 - CRDs `dpuoperatorconfigs`, `dataprocessingunits`, `servicefunctionchains` exist (DPU CRDs may briefly show Terminating from undeploy; they should settle)  
 - Deployment **Available**; current manager pod **Running / Ready**  
-- Certificate Ready; Secret `webhook-server-cert` present  
+- `Certificate`/`Issuer` listed; Secret `webhook-server-cert` present  
 
 #### Known flake: task exits 1 but deploy is fine
 
@@ -640,6 +673,38 @@ Then wait ~30s; those Failed to watch lines should stop. If a CRD is stuck Termi
 ---
 
 ## T4 — Apply enablement CR (triggers DPF install)
+
+### T4.0 — Fresh cluster: seed NVIDIA `DPU` CRD first (required)
+
+On **dh2**, leftover `*.dpu.nvidia.com` CRDs from earlier Helm installs let the
+adapter start. On a **clean** host (dh5), those CRDs are absent.
+
+`goal01-fix3` Lifecycle Manager **hard-watches** `DPU.provisioning.dpu.nvidia.com`.
+If that CRD is missing, the manager eventually exits:
+
+```text
+Failed to run manager … timed out waiting for cache to be synced … Kind=DPU
+```
+
+→ CrashLoop → **no** `EnsureInstalled` → no `dpf-operator-system`.
+Chicken-and-egg: LCM cannot Helm-install the chart that would create the CRD.
+
+**Before** applying `DpuOperatorConfig` on a clean cluster:
+
+```bash
+cd ~/opi-nvidia-dpf-adapter
+# Minimal: DPU kind only (enough for LCM watch to sync)
+kubectl apply -f test/e2e/crds/dpf/provisioning.dpu.nvidia.com_dpus.yaml
+# Safer: all vendored DPF CRDs (Helm will adopt/upgrade later)
+kubectl apply -f test/e2e/crds/dpf/
+
+kubectl get crd dpus.provisioning.dpu.nvidia.com
+kubectl -n opi-nvidia-dpf-adapter-system rollout restart deploy/opi-nvidia-dpf-adapter-controller-manager
+kubectl -n opi-nvidia-dpf-adapter-system rollout status deploy/opi-nvidia-dpf-adapter-controller-manager --timeout=120s
+# Want: managers Running, no CrashLoop from DPU cache sync
+```
+
+Then continue with the enablement CR below.
 
 On this lab’s OPI CRD, **`spec.vendor` is not a field** (strict decoding rejects it). Use annotations only:
 
