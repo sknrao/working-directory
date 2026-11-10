@@ -874,7 +874,22 @@ kubectl get secrets -A | grep -i 'sh.helm.release' | grep -i dpf || echo "no dpf
 Do these **in order**. Sync the latest `opi-nvidia-dpf-adapter` tree to dh2 first
 (sample YAML, Argo fallback fix, hardware-vsp image pin).
 
-### T5.1 — Apply singleton `DPFOperatorConfig` (sibling controllers)
+### T5.1 — Singleton `DPFOperatorConfig` (sibling controllers)
+
+**Automatic (preferred):** after Helm install/detect succeeds, LCM creates
+`dpf-operator-system/dpfoperatorconfig` when absent (same lab defaults as
+`config/samples/dpfoperatorconfig-lab.yaml`). Live objects are not overwritten;
+terminating objects are unstuck then recreated.
+
+```bash
+# Verify only — no manual apply needed on a healthy path
+kubectl -n dpf-operator-system get dpfoperatorconfig
+kubectl rollout status -n dpf-operator-system \
+  deploy/dpf-provisioning-controller-manager \
+  deploy/dpuservice-controller-manager --timeout=300s
+```
+
+**Break-glass** if LCM could not create (CRD missing mid-install, stuck delete):
 
 NVIDIA only deploys `dpf-provisioning-controller-manager` and
 `dpuservice-controller-manager` **after** this CR exists.
@@ -989,61 +1004,38 @@ kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p
 (message like `DPF CRDs, controllers, and prerequisites are healthy`).
 `VendorDPUReady=Rebooting` is expected until T5.4.
 
-### T5.3 — Hardware VSP overlay (not mock)
+### T5.3 — Hardware VSP (not mock)
 
-Default `make deploy` VSP is kind/mock (**2 containers**: `vsp` + `opi-daemon`).
-Lab BlueField needs the hardware overlay (**1 container**: `vsp` only).
-
-The overlay is **node-generic**: it selects any node with label
-`hardware.opiproject.org/profile=nvidia-bluefield` (not a hardcoded hostname).
-Only the **label target** changes per lab (`dh2`, `dh5`, …).
+**Automatic (preferred):** `make deploy` uses `DEPLOY_PROFILE=lab` →
+`config/overlays/lab` (hardware VSP PCI patch + NFD `NodeFeatureRule` that
+labels PCI vendor `15b3` with `hardware.opiproject.org/profile=nvidia-bluefield`).
+Kind/CI: `make deploy DEPLOY_PROFILE=kind` or `make deploy-kind`.
 
 ```bash
-# Set once for this host
-NODE=$(hostname -s)   # e.g. dh5
-# or: NODE=dh5
-```
-
-**Notes:**
-- System `kustomize` may be missing — use **`./bin/kustomize`** (or `kubectl apply -k`).
-- Re-apply OPI DPU/SFC CRDs if `api-resources` lacks them.
-- `kubectl label … not labeled` with the label still present = already set (OK).
-- Keep overlay `images.newTag` in sync with running adapter IMG (`goal01-fix3`).
-
-```bash
-# 0) OPI CRDs if needed
-kubectl apply -f ~/dpu-operator/config/crd/bases/
-kubectl api-resources | grep -E 'dataprocessingunit|servicefunctionchain'
-
-# 1) Optional: current VSP mode
-kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
-kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c vsp --tail=40 || true
-kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c opi-daemon --tail=40 || true
-
-# 2) Label THIS node (dh5, dh2, …)
-kubectl label node "$NODE" hardware.opiproject.org/profile=nvidia-bluefield --overwrite
-kubectl get node "$NODE" --show-labels | tr ',' '\n' | grep hardware.opiproject
-
-# 3) Apply hardware VSP (same overlay on every lab)
-cd ~/opi-nvidia-dpf-adapter
-grep -A2 'newName:' config/overlays/hardware-vsp/kustomization.yaml
-./bin/kustomize build config/overlays/hardware-vsp | kubectl apply -f -
-# Fallback: kubectl apply -k config/overlays/hardware-vsp
-
-# 4) Force new pod; expect 1/1 + containers=vsp only
-kubectl -n opi-nvidia-dpf-adapter-system delete pod -l app.kubernetes.io/component=vsp --wait=false
-kubectl -n opi-nvidia-dpf-adapter-system rollout status ds/opi-nvidia-dpf-adapter-nvidia-vsp --timeout=180s
+# Verify after make deploy (lab)
+kubectl get nodefeaturerule opi-nvidia-bluefield-profile
+kubectl get node --show-labels | tr ',' '\n' | grep hardware.opiproject || true
 kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
 kubectl -n opi-nvidia-dpf-adapter-system get pod -l app.kubernetes.io/component=vsp \
-  -o jsonpath='{range .items[*]}{.metadata.name}{" node="}{.spec.nodeName}{" containers="}{.spec.containers[*].name}{"\n"}{end}'
+  -o jsonpath='{range .items[*]}{.metadata.name}{" node="}{.spec.nodeName}{" containers="}{.spec.containers[*].name}{" image="}{.spec.containers[0].image}{"\n"}{end}'
 ```
 
 **T5.3 PASS when:**
-- Pod `1/1 Running` on `$NODE` (not `2/2` — that is still mock)
+- Pod `1/1 Running` on the BF node (not `2/2` — that is still mock/kind)
 - `containers=vsp` only
-- Image tag matches adapter (`goal01-fix3`)
+- Image matches adapter IMG
 
-**Stop if:** CrashLoop after overlay — `kubectl describe` + `lspci -nn | grep 15b3`; confirm `/sys` hostPath.
+**Break-glass** (NFD missing / label not yet applied):
+
+```bash
+NODE=$(hostname -s)
+kubectl label node "$NODE" hardware.opiproject.org/profile=nvidia-bluefield --overwrite
+cd ~/opi-nvidia-dpf-adapter
+make deploy IMG=$IMG   # re-apply lab profile
+# or: ./bin/kustomize build config/overlays/hardware-vsp | kubectl apply -f -
+```
+
+**Stop if:** CrashLoop — `kubectl describe` + `lspci -nn | grep 15b3`; confirm `/sys` hostPath.
 
 ### T5.4 — `VendorDPUReady` (optional for GOAL-01 if you refuse host reset)
 
