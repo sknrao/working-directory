@@ -1,7 +1,12 @@
 # GOAL-01 — Deploy `dpf-operator` through OPI
 
-**Lab host:** `dh2`  
-**Where you are (2026-11-06):** **GOAL-01 PARTIAL on dh2.** LCM/Helm path is proven (`VendorOperatorSupported` + `VendorOperatorReady` True; siblings Available; hardware VSP Ready). **`VendorDPUReady=True` was vacuous** — DPF `DPU`/`BFB` stuck `Deleting` for days; observer treated “not Rebooting” as Ready. Observer fixed to require phase Ready / reject Deleting (redeploy adapter). Full Goal-01 DPU Ready → **re-prove on dh5 (BF-3)** after clean inventory.
+**Hosts:**
+- `dh2` (BlueField-**2**) — LCM/Helm + VSP proven; `VendorDPUReady` incomplete (DPF 26.4 does not support BF-2 Create). Parked.
+- **`dh5` (BlueField-3) — next full Goal-01** (supported DPF hardware).
+
+**Where you are:** Before T2 on a **new** host, complete **Prerequisites (P0–P4)** below. Do not assume tools or cluster apps from dh2.
+
+Replace `<NODE>` with the Kubernetes node name (e.g. `dh5`).
 
 ---
 
@@ -22,45 +27,48 @@ On the **host** Kubernetes cluster only:
 |---|---|
 | `dpf-operator-system` + `dpf-operator-controller-manager` | Available |
 | `dpf-provisioning-controller-manager` + `dpuservice-controller-manager` | Available |
-| OPI `DpuOperatorConfig` conditions | `VendorOperatorSupported=True`, `VendorOperatorReady=True`, `VendorDPUReady=True` |
+| OPI `DpuOperatorConfig` conditions | `VendorOperatorSupported=True`, `VendorOperatorReady=True`, `VendorDPUReady=True` with live DPF `DPU` **phase=Ready** (not Deleting / Unknown) |
 | Adapter pods | managers Running; `nvidia-vsp` Ready (no CrashLoop) |
 
-**DPU-side Kubernetes is not required for GOAL-01.**
+**DPU-side Kubernetes is not required for GOAL-01.**  
+DPF **v26.4** platform support is **BlueField-3** (e.g. B3240 / B3220 / B3210). BF-2 is Observe-only.
 
 ---
 
-## Current lab baseline (already done on dh2)
+## Prerequisites — new host (BF-3) checklist
 
-Confirm before T2:
+Run **all** of P0–P4 on the new server before T2. Stop at the first FAIL.
+
+### P0 — Hardware / node identity
 
 ```bash
-kubectl get crd applications.argoproj.io certificates.cert-manager.io
-kubectl get ns | grep -E 'dpf-operator|opi-nvidia|opi-dpu-tenant' || echo "cleaned"
-helm list -A
-kubectl get pods -n argocd
-kubectl get pods -n cert-manager
+hostname
+kubectl get nodes -o wide
+kubectl get node <NODE> --show-labels
+
+# BlueField present (vendor 15b3)
+lspci -nn | grep -i 15b3 || echo "FAIL: no NVIDIA/Mellanox PCI device"
+
+# Prefer function 0
+lspci -nn -d 15b3: | head -20
 ```
 
-**Required baseline**
-
-| Item | Want |
+| Check | Want (BF-3 Goal-01) |
 |---|---|
-| `applications.argoproj.io` | exists |
-| `certificates.cert-manager.io` | exists |
-| namespaces `dpf-operator-system`, `opi-nvidia-dpf-adapter-system`, `opi-dpu-tenant` | absent |
-| Helm `argo-cd` | in namespace `argocd` |
-| Helm `cert-manager` | in namespace `cert-manager` |
-| Argo / cert-manager pods | Running |
+| Card generation | **BlueField-3** (not BF-2) |
+| Host | Bare metal worker or lab single-node; x86_64 |
+| PCIe AUX power | Connected if the SKU requires it |
+| High-speed ports | Cable/link up as required by your Host-Trusted layout |
 
-If baseline fails, stop and fix (see Appendix A — cleanup history). Do not start T2.
+**Stop if:** no `15b3` device, or card is BF-2 and you expected Create-capable Goal-01.
 
 ---
 
-## Tools checklist (install on dh2 before T2)
+### P1 — Pre-req **software** (CLI / build tools)
 
-Run on **dh2** (the machine that builds and talks to the cluster).
+Install on the machine that builds images and runs `kubectl`/`helm` (usually the lab host).
 
-### 0) Verify each tool (do not assume)
+#### P1.1 — Verify (do not assume)
 
 ```bash
 uname -a
@@ -70,92 +78,222 @@ git --version
 go version
 buildah --version
 podman --version
+docker version 2>/dev/null || true
 jq --version
 task --version || true
+mst version 2>/dev/null || mst --version 2>/dev/null || true
+mlxfwreset --version 2>/dev/null || true
+mlxconfig --version 2>/dev/null || true
 ```
 
-| Tool | Required? | Notes |
+| Tool | Required? | Why |
 |---|---|---|
-| `kubectl` | **Yes** | Must reach the host k3s API |
-| `helm` | **Yes** | Already used for Argo |
-| `git` | **Yes** | Clone `dpu-operator` |
-| `go` | **Yes** | Install **Go 1.26.10** once (covers OPI `dpu-operator` go 1.24.12 **and** adapter go 1.26.0 / toolchain 1.26.10) |
-| `buildah` | **Yes** | OPI `dpu-operator` image build/push uses **buildah**, not `docker build` |
-| `podman` | **Yes** | Used by build helpers / binfmt |
-| `jq` | Recommended | Cleanup / debug |
-| `task` | Recommended | Or use `go run ./tools/task/task.go …` from `dpu-operator` |
-| `docker` **or** `podman` as `CONTAINER_TOOL` | **Yes for T3** | Adapter `make docker-build` defaults to `docker`; set `CONTAINER_TOOL=podman` if you have no Docker |
+| `kubectl` | **Yes** | Cluster API |
+| `helm` **v3.5+** | **Yes** | Install cert-manager / Argo if missing; LCM uses Helm Go SDK for `dpf-operator` (CLI still needed for baseline) |
+| `git` | **Yes** | Clone `dpu-operator` / adapter |
+| `go` **1.26.x** (recommend 1.26.10) | **Yes** | Build OPI operator + adapter |
+| `buildah` | **Yes** | OPI `dpu-operator` image build/push |
+| `podman` | **Yes** | Build helpers / binfmt |
+| `docker` **or** `CONTAINER_TOOL=podman` | **Yes** (T3) | Adapter `make docker-build` |
+| `jq` | Recommended | Debug / JSONPath helpers |
+| `task` | Recommended | OPI Taskfile; else `go run ./tools/task/task.go` |
+| MFT: `mst`, `mlxfwreset`, `mlxconfig` | **Yes** for T5.4 SLR / NVCONFIG | Host System-Level Reset |
 
-### 1) Install missing tools (Ubuntu/Debian-style examples)
-
-Adjust for your distro if packages differ. Install **once** before T2; do not wait until a command fails.
+#### P1.2 — Install missing pieces (Ubuntu/Debian examples)
 
 ```bash
-# packages
 sudo apt-get update
-sudo apt-get install -y git jq buildah podman
+sudo apt-get install -y git jq buildah podman curl ca-certificates
 
-# Go 1.26.10 (official tarball) — use this for BOTH T2 and T3
+# Helm 3 (official script) — skip if helm version already v3.5+
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version
+
+# kubectl — use distro package, k3s kubectl, or upstream release matching the cluster
+kubectl version --client
+
+# Go 1.26.10
 curl -fsSL https://go.dev/dl/go1.26.10.linux-amd64.tar.gz -o /tmp/go.tgz
 sudo rm -rf /usr/local/go
 sudo tar -C /usr/local -xzf /tmp/go.tgz
 export PATH=/usr/local/go/bin:$PATH
 echo 'export PATH=/usr/local/go/bin:$PATH' >> ~/.bashrc
-go version   # must print go1.26.10 (or matching 1.26.x you installed)
+go version
 
-# task (optional but convenient)
+# task (optional)
 go install github.com/go-task/task/v3/cmd/task@latest
 export PATH="$(go env GOPATH)/bin:$PATH"
 echo 'export PATH="$(go env GOPATH)/bin:$PATH"' >> ~/.bashrc
-task --version
 ```
 
-**Stop if:** `go version` fails or is older than 1.26.  
-**Stop if:** `buildah --version` or `podman --version` fails.
-
-### 2) Cluster access
+**MFT (NVIDIA Firmware Tools)** — install from NVIDIA Network Adapter Firmware Tools  
+(DPF Host-Trusted docs: MFT **≥ 4.33.0-169**). After install:
 
 ```bash
-# If you normally use root's k3s config:
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-# or: export KUBECONFIG=$HOME/.kube/config
+sudo mst start
+mst status -v
+ls /dev/mst/
+```
+
+**Stop if:** `helm` missing/`<3.5`, `go` `<1.26`, or MFT missing when you need T5.4.
+
+#### P1.3 — Cluster access + registry
+
+```bash
+export KUBECONFIG=$HOME/.kube/config
+# or: export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 kubectl get nodes
 kubectl get ns
-```
 
-**Expect:** at least one Ready node; `argocd` and `cert-manager` namespaces exist.
-
-### 3) Container registry = Docker Hub
-
-Upstream `task` pushes images as:
-
-`$REGISTRY/dpu-operator:dev`, `$REGISTRY/dpu-daemon:dev`, …
-
-So set:
-
-```bash
 export REGISTRY=docker.io/<YOUR_DOCKERHUB_USER>
-# Example: export REGISTRY=docker.io/johndoe
-```
-
-**You must log in before push** (use a Docker Hub **access token**, not your account password if 2FA is on):
-
-```bash
 buildah login docker.io
-# Username: <YOUR_DOCKERHUB_USER>
-# Password: <Docker Hub access token>
-```
-
-(`docker login docker.io` is fine *extra*, but **buildah login** is what the push path needs.)
-
-**Cluster pull:** make the Hub repos **public**, or configure imagePullSecrets on the cluster so k3s can pull private images. Public is simplest for GOAL-01.
-
-**Verify login:**
-
-```bash
 buildah login --get-login docker.io
 ```
+
+Make Hub repos **public**, or configure `imagePullSecrets`. Public is simplest for GOAL-01.
+
+---
+
+### P2 — Host **drivers / vendor software**
+
+These are **host OS** packages/modules, not Kubernetes pods. Required for PCI discovery, NVCONFIG, and System-Level Reset.
+
+```bash
+# Kernel mlx5 / RDMA stack present?
+lsmod | grep -E 'mlx5|ib_uverbs|ib_core' || echo "WARN: mlx5 modules not loaded"
+
+# OFED / DOCA host stack (names vary by install)
+ofed_info 2>/dev/null | head -5 || true
+doca-info 2>/dev/null | head -5 || true
+dpkg -l | grep -iE 'mlnx-ofed|doca|mft' | head -40 || true
+
+# rshim: DPF Host-Trusted worker guidance often says rshim should NOT be installed
+# on the worker (management via host-agent path). Check and note:
+dpkg -l | grep -i rshim || echo "rshim package not installed (often OK for Host-Trusted workers)"
+ls /dev/rshim* 2>/dev/null || echo "no /dev/rshim* (OK if not using rshim console)"
+
+# Firmware / device query via MFT
+sudo mst start
+DEV=$(ls /dev/mst/*pciconf0 2>/dev/null | head -1)
+echo "MST device=$DEV"
+[[ -n "$DEV" ]] && sudo mlxconfig -d "$DEV" q | head -40
+[[ -n "$DEV" ]] && sudo mlxfwreset -d "$DEV" q | head -40
+```
+
+| Component | Want | Notes |
+|---|---|---|
+| `mlx5_core` (or OFED equiv.) | Loaded / usable | Host driver for BlueField PCI functions |
+| MFT (`mst` / `mlxconfig` / `mlxfwreset`) | Installed + `mst start` works | NVCONFIG + level-4 SLR |
+| DOCA / BFB on DPU | DOCA **≥ 2.5** on card; DPF 26.4 matrix prefers supported BFB (e.g. 3.2 LTS / 3.4) | Flash/provision per NVIDIA docs if card is empty |
+| `rshim` on worker | Usually **absent** for Host-Trusted workers | Control-plane-with-DPU NIC-mode uses different rules |
+| Internet egress | Host can reach NGC Helm + image registries | LCM pulls `helm.ngc.nvidia.com/nvidia/doca` |
+
+**Stop if:** no MST device, `mlxfwreset q` fails hard, or card has no usable firmware/BFB for DPF.
+
+Official refs:
+- [DPF 26.4 platform support](https://networking-docs.nvidia.com/dpf/26.4.0/platform-support)
+- [Host Trusted prerequisites](https://networking-docs.nvidia.com/dpf/26.4.0/dpf-system-prerequisites-for-host-trusted)
+
+---
+
+### P3 — Cluster **apps / pods** (cert-manager, Argo CD, …)
+
+LCM preflight **blocks** install without these CRDs (see adapter `docs/lcm-preflight-deps.md`).  
+Install into dedicated namespaces — **not** into `dpf-operator-system`.
+
+#### P3.1 — Required APIs and pods
+
+```bash
+kubectl get crd applications.argoproj.io certificates.cert-manager.io
+kubectl get ns argocd cert-manager
+kubectl get pods -n cert-manager
+kubectl get pods -n argocd
+helm list -A
+kubectl version
+```
+
+| App | Namespace | Want |
+|---|---|---|
+| **cert-manager** | `cert-manager` | CRD `certificates.cert-manager.io`; webhook + controller pods Running |
+| **Argo CD** | **`argocd`** | CRD `applications.argoproj.io`; server + repo-server + application-controller Running |
+| Kubernetes | — | Adapter pin: minor **v1.36.x** (lab used `v1.36.4+k3s1`). DPF docs also list a wider range — **this adapter blocks non-1.36**. |
+| Kamaji | — | **Not** required for GOAL-01 Host-Trusted / `installViaHostAgent` with kamaji disabled |
+
+#### P3.2 — Install if missing (examples)
+
+**cert-manager** (pick a current stable chart; example):
+
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+kubectl create namespace cert-manager --dry-run=client -o yaml | kubectl apply -f -
+helm upgrade --install cert-manager jetstack/cert-manager \
+  -n cert-manager --set crds.enabled=true --wait
+kubectl get pods -n cert-manager
+```
+
+**Argo CD** into namespace **`argocd`**:
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+helm upgrade --install argo-cd argo/argo-cd -n argocd --wait
+kubectl get pods -n argocd
+kubectl get crd applications.argoproj.io
+```
+
+**Do not** install `dpf-operator` with Helm yourself — that is the LCM’s job in T4.
+
+#### P3.3 — Gate
+
+```bash
+kubectl get crd applications.argoproj.io certificates.cert-manager.io
+kubectl get pods -n argocd
+kubectl get pods -n cert-manager
+# All required pods Running; CRDs present
+```
+
+**Stop if:** either CRD missing or pods CrashLoop / Pending.
+
+---
+
+### P4 — Clean slate (GOAL-01 namespaces / releases)
+
+```bash
+kubectl get ns | grep -E 'dpf-operator|opi-nvidia|opi-dpu-tenant' || echo "cleaned"
+helm list -A | grep -E 'dpf-operator|node-feature|kamaji|maintenance' || echo "no dpf-ish releases"
+kubectl get dpu,dpudevice,dpuflavor,bfb -A 2>/dev/null || true
+```
+
+| Item | Want |
+|---|---|
+| `dpf-operator-system` | absent **or** empty of conflicting Helm release you do not own |
+| `opi-nvidia-dpf-adapter-system` | absent before first deploy (or intentional redeploy) |
+| Leftover DPF `DPU`/`BFB` `Deleting` | none (clear finalizers if stuck — see dh2 Appendix) |
+
+If dirty, clean before T2 (Appendix A pattern). Do not start T2 on a half-deleted DPF namespace.
+
+---
+
+### Prerequisite summary gate
+
+| # | Area | PASS when |
+|---|---|---|
+| P0 | Hardware | BF-3 visible (`lspci` 15b3); node Ready |
+| P1 | Software | `kubectl`, `helm≥3.5`, `go≥1.26`, buildah/podman, MFT |
+| P2 | Drivers / vendor | `mst start` + device; mlx5/OFED usable; egress to NGC |
+| P3 | Apps / pods | cert-manager + Argo in `argocd` Running + CRDs |
+| P4 | Clean slate | no conflicting dpf/adapter leftovers |
+
+Only then continue to **T2**.
+
+---
+
+### dh2 reference (already done — do not re-baseline blindly)
+
+On **dh2**, P3/P4 were completed earlier (Argo in `argocd`, cert-manager present). Goal-01 there is **PARTIAL** (LCM OK; BF-2 cannot honestly finish Create/`VendorDPUReady` phase Ready). Use dh2 only for LCM/Observe regression; use **dh5** for full BF-3 Goal-01.
 
 ---
 
@@ -959,12 +1097,14 @@ kubectl get pods -n opi-nvidia-dpf-adapter-system
 - `KUBECONFIG_HOST`:
 - Go version used for T2 / T3:
 
-### Baseline
+### Baseline (P0–P4)
 
 ```text
-# paste: kubectl get crd applications… certificates…
-# paste: helm list -A
-# paste: kubectl get pods -n argocd ; kubectl get pods -n cert-manager
+# P0: hostname, lspci -nn | grep 15b3, kubectl get nodes
+# P1: helm version, go version, kubectl version --client, mst status
+# P2: lsmod | grep mlx5; mst start; ls /dev/mst; ofed_info/doca-info if any
+# P3: kubectl get crd applications… certificates…; pods -n argocd; pods -n cert-manager; helm list -A
+# P4: ns / helm / dpu leftovers
 ```
 
 ### T2
