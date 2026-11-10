@@ -989,53 +989,59 @@ kubectl get dpuoperatorconfig dpu-operator-config -o yaml | sed -n '/status:/,$p
 (message like `DPF CRDs, controllers, and prerequisites are healthy`).
 `VendorDPUReady=Rebooting` is expected until T5.4.
 
-### T5.3 — Fix VSP CrashLoop (hardware overlay)
+### T5.3 — Hardware VSP overlay (not mock)
 
 Default `make deploy` VSP is kind/mock (**2 containers**: `vsp` + `opi-daemon`).
 Lab BlueField needs the hardware overlay (**1 container**: `vsp` only).
 
-**Important (dh2 facts):**
-- System `kustomize` may be missing — use **`./bin/kustomize`** from the adapter repo
-  (or `kubectl apply -k`).
-- Mock `opi-daemon` CrashLoops if OPI `DataProcessingUnit` / `ServiceFunctionChain`
-  CRDs were deleted during earlier undeploy races — re-apply them **before** or with
-  the overlay.
-- `kubectl label … not labeled` with the label still showing in `--show-labels` means
-  the value was **already set** (success).
+The overlay is **node-generic**: it selects any node with label
+`hardware.opiproject.org/profile=nvidia-bluefield` (not a hardcoded hostname).
+Only the **label target** changes per lab (`dh2`, `dh5`, …).
 
 ```bash
-# 0) Restore OPI DPU/SFC CRDs (required if api-resources lacks DataProcessingUnit)
+# Set once for this host
+NODE=$(hostname -s)   # e.g. dh5
+# or: NODE=dh5
+```
+
+**Notes:**
+- System `kustomize` may be missing — use **`./bin/kustomize`** (or `kubectl apply -k`).
+- Re-apply OPI DPU/SFC CRDs if `api-resources` lacks them.
+- `kubectl label … not labeled` with the label still present = already set (OK).
+- Keep overlay `images.newTag` in sync with running adapter IMG (`goal01-fix3`).
+
+```bash
+# 0) OPI CRDs if needed
 kubectl apply -f ~/dpu-operator/config/crd/bases/
 kubectl api-resources | grep -E 'dataprocessingunit|servicefunctionchain'
 
-# 1) Optional: see current failure mode
+# 1) Optional: current VSP mode
 kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
 kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c vsp --tail=40 || true
 kubectl -n opi-nvidia-dpf-adapter-system logs -l app.kubernetes.io/component=vsp -c opi-daemon --tail=40 || true
 
-# 2) Node label required by overlay nodeSelector
-kubectl label node dh2 hardware.opiproject.org/profile=nvidia-bluefield --overwrite
-kubectl get node dh2 --show-labels | tr ',' '\n' | grep hardware.opiproject
+# 2) Label THIS node (dh5, dh2, …)
+kubectl label node "$NODE" hardware.opiproject.org/profile=nvidia-bluefield --overwrite
+kubectl get node "$NODE" --show-labels | tr ',' '\n' | grep hardware.opiproject
 
-# 3) Apply hardware VSP (pin must match T5.2 IMG = goal01-fix3)
+# 3) Apply hardware VSP (same overlay on every lab)
 cd ~/opi-nvidia-dpf-adapter
 grep -A2 'newName:' config/overlays/hardware-vsp/kustomization.yaml
 ./bin/kustomize build config/overlays/hardware-vsp | kubectl apply -f -
-# Fallback if ./bin/kustomize missing:
-#   kubectl apply -k config/overlays/hardware-vsp
+# Fallback: kubectl apply -k config/overlays/hardware-vsp
 
-# 4) Force new pod and verify 1/1 + containers=vsp only
+# 4) Force new pod; expect 1/1 + containers=vsp only
 kubectl -n opi-nvidia-dpf-adapter-system delete pod -l app.kubernetes.io/component=vsp --wait=false
 kubectl -n opi-nvidia-dpf-adapter-system rollout status ds/opi-nvidia-dpf-adapter-nvidia-vsp --timeout=180s
 kubectl -n opi-nvidia-dpf-adapter-system get pods -l app.kubernetes.io/component=vsp -o wide
 kubectl -n opi-nvidia-dpf-adapter-system get pod -l app.kubernetes.io/component=vsp \
-  -o jsonpath='{range .items[*]}{.metadata.name}{" containers="}{.spec.containers[*].name}{"\n"}{end}'
+  -o jsonpath='{range .items[*]}{.metadata.name}{" node="}{.spec.nodeName}{" containers="}{.spec.containers[*].name}{"\n"}{end}'
 ```
 
 **T5.3 PASS when:**
-- Pod `1/1 Running` (not `2/2` — that is still mock)
+- Pod `1/1 Running` on `$NODE` (not `2/2` — that is still mock)
 - `containers=vsp` only
-- Image tag `goal01-fix3`
+- Image tag matches adapter (`goal01-fix3`)
 
 **Stop if:** CrashLoop after overlay — `kubectl describe` + `lspci -nn | grep 15b3`; confirm `/sys` hostPath.
 
