@@ -1,8 +1,19 @@
 # GOAL-02 — Observe OPI ↔ DPF (Read before Create)
 
-**Lab host:** `dh2`  
-**Depends on:** GOAL-01 PASS (dpf-operator via LCM; Vendor* True; hardware VSP Ready)  
-**Where you are (2026-11-06):** Goal-02 Observe **PASS** on dh2 (clean rerun 10:34Z after DPU/BFB unstick). VSP stamp + BF2 status + zero Create. OPI `Ready` still absent (hardware VSP has no opi-daemon handshake) — acceptable for Observe.
+**Lab hosts:** `dh2` (BF-2, Observe-only) · **`dh5` (BF-3, active)**  
+**Depends on:** GOAL-01 LCM core (VendorOperatorSupported/Ready); hardware VSP recommended  
+**Where you are:** dh2 Goal-02 PASS (BF-2). On **dh5** use BF-3 sample / script default.
+
+```bash
+# dh5 (default when hostname is dh5):
+ADAPTER_DIR=~/opi-nvidia-dpf-adapter ./goal02-observe.sh
+# or force:
+DPU_PROFILE=bf3 ADAPTER_DIR=~/opi-nvidia-dpf-adapter ./goal02-observe.sh
+# dh2:
+DPU_PROFILE=bf2 ADAPTER_DIR=~/opi-nvidia-dpf-adapter ./goal02-observe.sh
+```
+
+**BF-3 note:** mapping emit requires matching BlueField-3 — so dh5 Observe may **Create** DPF children once VSP stamps product-name. That overlaps Goal-03; T4 in the script reports inventory either way.
 
 ---
 
