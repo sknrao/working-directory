@@ -13,33 +13,37 @@ DPU_PROFILE=bf3 ADAPTER_DIR=~/opi-nvidia-dpf-adapter ./goal02-observe.sh
 DPU_PROFILE=bf2 ADAPTER_DIR=~/opi-nvidia-dpf-adapter ./goal02-observe.sh
 ```
 
-**BF-3 note:** mapping emit requires matching BlueField-3 — so dh5 Observe may **Create** DPF children once VSP stamps product-name. That overlaps Goal-03; T4 in the script reports inventory either way.
+**BF-3 note:** mapping emit requires matching BlueField-3 — so dh5 Observe may **Create** DPF children once VSP stamps product-name. That overlaps [GOAL-03](GOAL-03-create-dpu.md); T4 in the script reports inventory either way.
 
 ---
 
 ## Goal
 
-Prove the **Read / Observe** path before any OPI→DPF Create:
+Prove the **Read / Observe** path (VSP + status + inventory correlation).
 
-1. Apply one OPI `DataProcessingUnit` that honestly declares **BlueField-2** on node `dh2`.
-2. Let the NVIDIA VSP stamp hardware identity annotations (serial, PCI, product).
-3. Confirm translator status (`DPFHardwareCompatible`, `DPFReady`) with honest BF2 reasons.
-4. Read existing DPF inventory and correlate it to the OPI object.
-5. Confirm the adapter emits **zero** new `DPUDevice` / `DPUFlavor` / `BFB` / `DPU`.
+- **`dh2` / BF-2:** Observe **before** Create — emit must stay off.
+- **`dh5` / BF-3:** Observe still required; Create emit is **allowed** (Goal-03 overlap). Do **not** fail Goal-02 because owned DPF children exist. Do **not** require DPF `OPERATIONAL=True` (runtime/dataplane; separate from Observe).
 
-**Create (emit SSA of DPF children) is Goal-03 — out of scope here.**
-
-### PASS
+### PASS — BF-2 (`dh2`)
 
 | Check | Want |
 |---|---|
-| OPI `DataProcessingUnit` `dh2-bluefield-2` | Exists; `spec.dpuProductName=BlueField-2`; `spec.nodeName=dh2` |
-| VSP annotations | `provisioning.dpu.nvidia.com/serial-number`, `pci-address`, `discovery.opiproject.org/product-name` (expect BlueField-2) |
-| OPI `Ready` | True when hardware healthy (VSP / daemon path) |
-| `DPFHardwareCompatible` | False / `UnsupportedHardware` (BF2 ≠ BF3 Create profile) |
-| `DPFReady` | False with BF2 / non-Create reason (not Create success) |
-| DPF inventory | Readable; correlated by name/serial/node |
-| Adapter Create | **No** new owned DPF children from this DPU |
+| OPI `DataProcessingUnit` `dh2-bluefield-2` | Exists; `BlueField-2`; `nodeName=dh2` |
+| VSP annotations | serial, PCI, product-name ≈ BlueField-2 |
+| `DPFHardwareCompatible` | False / `UnsupportedHardware` |
+| `DPFReady` | Not Create success |
+| Adapter Create | **No** owned DPF children for this source |
+
+### PASS — BF-3 (`dh5`)
+
+| Check | Want |
+|---|---|
+| OPI `DataProcessingUnit` `dh5-bluefield-3` | Exists; `BlueField-3`; `nodeName=dh5` |
+| VSP annotations | serial, PCI, product-name ≈ BlueField-3 |
+| `DPFHardwareCompatible` | True / supported |
+| `DPFReady` | True / `AllChildrenReady` when DPF `DPU` phase=`Ready` |
+| Correlation | Owned DPF objects labeled/ownerRef’d to this OPI DPU |
+| `OPERATIONAL` | **Out of scope** for Goal-02 |
 
 ---
 

@@ -81,12 +81,24 @@ esac
   kubectl get dpu,dpudevice,dpuflavor,bfb -A \
     -l "translation.opi.nvidia.com/source-name=$DPU_NAME" -o wide 2>/dev/null || true
   echo "note: $CREATE_NOTE"
+  if [[ "$EXPECT_PRODUCT" == "BlueField-2" ]]; then
+    echo "PASS hint (BF-2): owned children labeled source-name=$DPU_NAME must be empty"
+  else
+    echo "PASS hint (BF-3): owned children are allowed; require DPFReady/Compatible + correlation in T5"
+    echo "OPERATIONAL on DPF DPU is NOT a Goal-02 gate (dataplane/runtime)"
+  fi
   echo
 
   echo "=== T5 correlate ==="
   kubectl get dataprocessingunit "$DPU_NAME" \
     -o jsonpath='name={.metadata.name} node={.spec.nodeName} product={.spec.dpuProductName} serial={.metadata.annotations.provisioning\.dpu\.nvidia\.com/serial-number} pci={.metadata.annotations.provisioning\.dpu\.nvidia\.com/pci-address} observed={.metadata.annotations.discovery\.opiproject\.org/product-name}{"\n"}' || true
+  kubectl get dataprocessingunit "$DPU_NAME" \
+    -o jsonpath='{range .status.conditions[*]}{.type}={.status}/{.reason} {.message}{"\n"}{end}' || true
   kubectl -n dpf-operator-system get dpu -o wide || true
+  if [[ "$EXPECT_PRODUCT" == "BlueField-3" ]]; then
+    kubectl -n dpf-operator-system get dpu "$DPU_NAME" \
+      -o jsonpath='phase={.status.phase} ready={.status.conditions[?(@.type=="Ready")].status}{"\n"}' 2>/dev/null || true
+  fi
   echo
   echo "=== done ==="
 } | tee "$OUT"
