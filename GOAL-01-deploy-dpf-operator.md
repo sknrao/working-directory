@@ -518,31 +518,19 @@ under that name is expected and **not** a failure.
 - Deployment **Available**; current manager pod **Running / Ready**  
 - `Certificate`/`Issuer` listed; Secret `webhook-server-cert` present  
 
-#### Known flake: task exits 1 but deploy is fine
+#### Fixed in `dpu-operator/taskfile.yaml`
 
-After cert sync the task restarts the Deployment, then runs:
+Root cause of the clean-cluster noise: **`deploy` / `deploy-1c` used to call undeploy
+first**. On a fresh cluster that is pointless — there is nothing to remove, and undeploy
+tried to delete `DpuOperatorConfig` before the CRD existed.
 
-```text
-kubectl … wait --for=condition=ready pod --all
-```
+- **`deploy` / `deploy-1c`**: apply + wait only (fresh install path).
+- **`undeploy` / `undeploy-1c`**: explicit wipe (CRD-gated config delete).
+- **`redeploy` / `redeploy-1c`**: wipe then deploy (dev iteration).
+- Pod wait uses `-l control-plane=controller-manager` (not `--all`) after webhook restart.
 
-If an **old** ReplicaSet pod disappears mid-wait, kubectl can print:
-
-```text
-Error from server (NotFound): pods "dpu-operator-controller-manager-….…" not found
-task: Failed to run task "deploy-1c": exit status 1
-```
-
-even when the **new** pod is Ready and `wait --for=condition=Available deployment/…` already succeeded.
-
-**Treat as PASS when all of these are true:**
-
-1. Log showed `"upstream-certmanager" = "upstream-certmanager"`
-2. `deployment … successfully rolled out` / Available condition met
-3. Current pod Ready (your `describe` showed Ready=True)
-4. `certificate` Ready and `webhook-server-cert` exists
-
-Do **not** re-run undeploy/deploy just because of that NotFound flake. Continue to **T3**.
+Sync the patched `taskfile.yaml` to `/root/dpu-operator` before re-running. Fresh
+`task deploy-1c` should not touch undeploy and should exit **0**.
 
 **Common failures**
 
@@ -689,22 +677,18 @@ Failed to run manager … timed out waiting for cache to be synced … Kind=DPU
 → CrashLoop → **no** `EnsureInstalled` → no `dpf-operator-system`.
 Chicken-and-egg: LCM cannot Helm-install the chart that would create the CRD.
 
-**Before** applying `DpuOperatorConfig` on a clean cluster:
+**Before** applying `DpuOperatorConfig` on a clean cluster: DPF CRDs must exist.
+`make deploy` already runs `make install-dpf-crds` (kustomize-build with Helm
+ownership stamps — **not** `kubectl apply -f test/e2e/crds/dpf/`).
 
-```bash
-cd ~/opi-nvidia-dpf-adapter
-# Minimal: DPU kind only (enough for LCM watch to sync)
-kubectl apply -f test/e2e/crds/dpf/provisioning.dpu.nvidia.com_dpus.yaml
-# Safer: all vendored DPF CRDs (Helm will adopt/upgrade later)
-kubectl apply -f test/e2e/crds/dpf/
+If Helm fails with `invalid ownership metadata` on seeded CRDs: **fixed in
+adapter** (`SDKHelmClient` `TakeOwnership=true` + seed kustomization stamps).
+Rebuild/push/redeploy the adapter image to pick it up. Break-glass on an old
+image: label/annotate all `*.dpu.nvidia.com` CRDs for release
+`dpf-operator` / `dpf-operator-system`, then reconcile-annotate the
+`DpuOperatorConfig` (see M1 user-guide troubleshooting).
 
-kubectl get crd dpus.provisioning.dpu.nvidia.com
-kubectl -n opi-nvidia-dpf-adapter-system rollout restart deploy/opi-nvidia-dpf-adapter-controller-manager
-kubectl -n opi-nvidia-dpf-adapter-system rollout status deploy/opi-nvidia-dpf-adapter-controller-manager --timeout=120s
-# Want: managers Running, no CrashLoop from DPU cache sync
-```
-
-Then continue with the enablement CR below.
+Then continue with the enablement CR below (or just wait for reconcile).
 
 On this lab’s OPI CRD, **`spec.vendor` is not a field** (strict decoding rejects it). Use annotations only:
 
