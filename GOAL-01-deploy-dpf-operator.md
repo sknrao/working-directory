@@ -924,7 +924,13 @@ kubectl -n dpf-operator-system get dpfoperatorconfig -o wide
 ```
 
 Argo must reconcile Applications in `dpf-operator-system`. If Apps stay
-OutOfSync / error, ensure Argo’s `application.namespaces` includes that NS.
+OutOfSync / empty Sync/Health, fix namespaces (comma form, **no brackets**):
+
+```bash
+make lab-fix-argo-app-namespaces
+# or from adapter tree: ./hack/lab-fix-argo-app-namespaces.sh
+```
+
 
 Then wait (only after a live, non-deleting config):
 
