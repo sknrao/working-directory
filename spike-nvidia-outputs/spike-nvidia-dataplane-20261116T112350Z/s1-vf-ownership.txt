@@ -1,0 +1,519 @@
+
+===== S1: who creates host VFs, which ones DPF uses =====
+
+$ lspci -nn -d 15b3:
+0d:00.0 Ethernet controller [0200]: Mellanox Technologies MT43244 BlueField-3 integrated ConnectX-7 network controller [15b3:a2dc] (rev 01)
+0d:00.1 Ethernet controller [0200]: Mellanox Technologies MT43244 BlueField-3 integrated ConnectX-7 network controller [15b3:a2dc] (rev 01)
+0d:00.2 DMA controller [0801]: Mellanox Technologies MT43244 BlueField-3 SoC Management Interface [15b3:c2d5] (rev 01)
+0d:00.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:00.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:00.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:00.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:00.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:01.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:02.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:03.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:04.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:05.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:06.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:07.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:08.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:09.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0a.7 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.0 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.1 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.2 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.3 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.4 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.5 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+0d:0b.6 Ethernet controller [0200]: Mellanox Technologies ConnectX Family mlx5Gen Virtual Function [15b3:101e] (rev 01)
+
+===== PF 0000:0d:00.0 netdev=enp13s0f0np0 =====
+device                   0xa2dc
+sriov_totalvfs           46
+sriov_numvfs             46
+sriov_drivers_autoprobe  1
+numa_node                0
+
+$ ethtool -i enp13s0f0np0
+driver: mlx5_core
+version: 2607.0.100
+firmware-version: 32.49.1014 (MT_0000000884)
+expansion-rom-version: 
+bus-info: 0000:0d:00.0
+supports-statistics: yes
+supports-test: yes
+supports-eeprom-access: no
+supports-register-dump: no
+supports-priv-flags: yes
+
+$ devlink dev eswitch show pci/0000:0d:00.0
+kernel answers: Operation not supported
+(exit 1)
+
+$ ip -d link show enp13s0f0np0
+6: enp13s0f0np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:63:c0:e4:b7:d0 brd ff:ff:ff:ff:ff:ff promiscuity 0 minmtu 68 maxmtu 9978 addrgenmode eui64 numtxqueues 512 numrxqueues 63 gso_max_size 65536 gso_max_segs 65535 portname p0 parentbus pci parentdev 0000:0d:00.0 
+    vf 0     link/ether 7e:76:e6:66:10:4f brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 1     link/ether 8e:8c:60:9c:0b:07 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 2     link/ether 46:6a:87:4d:3b:49 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 3     link/ether 3e:a8:77:85:c4:3b brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 4     link/ether 02:77:6a:2c:63:c7 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 5     link/ether 0a:97:d0:91:af:69 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 6     link/ether 66:5a:84:81:db:e0 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 7     link/ether da:ac:0f:d7:04:a8 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 8     link/ether 76:66:ed:40:d2:de brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 9     link/ether c6:06:da:c6:e7:6e brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 10     link/ether da:ce:e1:b4:5d:bb brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 11     link/ether 9e:80:a1:0a:05:55 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 12     link/ether 76:08:81:3a:4d:fc brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 13     link/ether 8a:17:14:bb:d9:64 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 14     link/ether f6:0e:8a:a0:64:fe brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 15     link/ether 7a:08:fa:31:e8:a9 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 16     link/ether a2:13:c6:f1:26:01 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 17     link/ether ba:aa:97:be:f7:2a brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 18     link/ether f2:87:3d:14:8c:cd brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 19     link/ether 46:27:ba:2b:c4:90 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 20     link/ether d6:7a:27:91:ef:53 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 21     link/ether e2:60:f7:07:53:ef brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 22     link/ether 1a:66:74:92:bb:b9 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 23     link/ether 0a:a0:40:82:e6:c3 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 24     link/ether aa:34:51:66:fc:80 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 25     link/ether e6:ba:0d:20:55:29 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 26     link/ether ae:17:8d:86:d4:17 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 27     link/ether 76:8f:65:e5:5e:a8 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 28     link/ether 6e:00:ea:02:46:e8 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 29     link/ether ae:de:6b:56:de:77 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 30     link/ether 8e:48:3b:d7:ca:68 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 31     link/ether d2:2a:79:79:7d:4d brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 32     link/ether 22:f2:a5:68:23:b5 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 33     link/ether ee:a9:5c:dc:b5:45 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 34     link/ether 42:15:ee:06:ba:ee brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 35     link/ether aa:1e:05:be:f2:26 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 36     link/ether 02:5e:c1:c3:ba:e3 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 37     link/ether 22:c7:64:00:9b:97 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 38     link/ether fa:71:54:a6:73:ff brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 39     link/ether 5e:55:64:24:15:62 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 40     link/ether b6:69:86:ce:e2:14 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 41     link/ether 46:f9:b7:7e:bf:cf brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 42     link/ether 0e:55:94:74:12:a8 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 43     link/ether 2a:2b:81:9f:d0:68 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 44     link/ether b6:84:a0:83:c0:df brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 45     link/ether ae:22:71:4a:41:6f brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+
+idx vf-pci netdev driver master
+0 0000:0d:00.3 enp13s0f0v0 mlx5_core br-dpu
+1 0000:0d:00.4 enp13s0f0v1 mlx5_core -
+2 0000:0d:00.5 enp13s0f0v2 mlx5_core -
+3 0000:0d:00.6 enp13s0f0v3 mlx5_core -
+4 0000:0d:00.7 enp13s0f0v4 mlx5_core -
+5 0000:0d:01.0 enp13s0f0v5 mlx5_core -
+6 0000:0d:01.1 enp13s0f0v6 mlx5_core -
+7 0000:0d:01.2 enp13s0f0v7 mlx5_core -
+8 0000:0d:01.3 enp13s0f0v8 mlx5_core -
+9 0000:0d:01.4 enp13s0f0v9 mlx5_core -
+10 0000:0d:01.5 <not-in-host-netns> mlx5_core -
+11 0000:0d:01.6 enp13s0f0v11 mlx5_core -
+12 0000:0d:01.7 enp13s0f0v12 mlx5_core -
+13 0000:0d:02.0 enp13s0f0v13 mlx5_core -
+14 0000:0d:02.1 enp13s0f0v14 mlx5_core -
+15 0000:0d:02.2 enp13s0f0v15 mlx5_core -
+16 0000:0d:02.3 enp13s0f0v16 mlx5_core -
+17 0000:0d:02.4 enp13s0f0v17 mlx5_core -
+18 0000:0d:02.5 enp13s0f0v18 mlx5_core -
+19 0000:0d:02.6 enp13s0f0v19 mlx5_core -
+20 0000:0d:02.7 enp13s0f0v20 mlx5_core -
+21 0000:0d:03.0 enp13s0f0v21 mlx5_core -
+22 0000:0d:03.1 enp13s0f0v22 mlx5_core -
+23 0000:0d:03.2 enp13s0f0v23 mlx5_core -
+24 0000:0d:03.3 enp13s0f0v24 mlx5_core -
+25 0000:0d:03.4 enp13s0f0v25 mlx5_core -
+26 0000:0d:03.5 enp13s0f0v26 mlx5_core -
+27 0000:0d:03.6 enp13s0f0v27 mlx5_core -
+28 0000:0d:03.7 enp13s0f0v28 mlx5_core -
+29 0000:0d:04.0 enp13s0f0v29 mlx5_core -
+30 0000:0d:04.1 enp13s0f0v30 mlx5_core -
+31 0000:0d:04.2 enp13s0f0v31 mlx5_core -
+32 0000:0d:04.3 enp13s0f0v32 mlx5_core -
+33 0000:0d:04.4 enp13s0f0v33 mlx5_core -
+34 0000:0d:04.5 enp13s0f0v34 mlx5_core -
+35 0000:0d:04.6 enp13s0f0v35 mlx5_core -
+36 0000:0d:04.7 enp13s0f0v36 mlx5_core -
+37 0000:0d:05.0 enp13s0f0v37 mlx5_core -
+38 0000:0d:05.1 enp13s0f0v38 mlx5_core -
+39 0000:0d:05.2 enp13s0f0v39 mlx5_core -
+40 0000:0d:05.3 enp13s0f0v40 mlx5_core -
+41 0000:0d:05.4 enp13s0f0v41 mlx5_core -
+42 0000:0d:05.5 enp13s0f0v42 mlx5_core -
+43 0000:0d:05.6 enp13s0f0v43 mlx5_core -
+44 0000:0d:05.7 enp13s0f0v44 mlx5_core -
+45 0000:0d:06.0 enp13s0f0v45 mlx5_core -
+
+===== PF 0000:0d:00.1 netdev=enp13s0f1np1 =====
+device                   0xa2dc
+sriov_totalvfs           46
+sriov_numvfs             46
+sriov_drivers_autoprobe  1
+numa_node                0
+
+$ ethtool -i enp13s0f1np1
+driver: mlx5_core
+version: 2607.0.100
+firmware-version: 32.49.1014 (MT_0000000884)
+expansion-rom-version: 
+bus-info: 0000:0d:00.1
+supports-statistics: yes
+supports-test: yes
+supports-eeprom-access: no
+supports-register-dump: no
+supports-priv-flags: yes
+
+$ devlink dev eswitch show pci/0000:0d:00.1
+kernel answers: Operation not supported
+(exit 1)
+
+$ ip -d link show enp13s0f1np1
+7: enp13s0f1np1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:63:c0:e4:b7:d1 brd ff:ff:ff:ff:ff:ff promiscuity 0 minmtu 68 maxmtu 9978 addrgenmode eui64 numtxqueues 512 numrxqueues 63 gso_max_size 65536 gso_max_segs 65535 portname p1 parentbus pci parentdev 0000:0d:00.1 
+    vf 0     link/ether 8a:27:8d:3b:03:1b brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 1     link/ether 6e:26:9d:a5:8b:90 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 2     link/ether 6a:42:b9:32:fa:b2 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 3     link/ether 4a:cb:33:e3:33:f9 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 4     link/ether 3e:31:c5:b5:e5:2c brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 5     link/ether 16:d4:57:c2:cd:71 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 6     link/ether a6:be:bb:ef:58:5d brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 7     link/ether a2:35:08:f7:d8:2b brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 8     link/ether fa:fe:9f:5f:7d:6c brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 9     link/ether e6:ab:e9:1a:f0:65 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 10     link/ether b6:84:c0:8b:c4:f7 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 11     link/ether ce:14:88:0b:ee:50 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 12     link/ether ae:6a:a9:14:e4:82 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 13     link/ether 6e:15:92:8c:bd:f3 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 14     link/ether be:67:89:ff:d1:34 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 15     link/ether 32:12:10:ed:25:cc brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 16     link/ether da:ed:97:e4:1a:ee brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 17     link/ether 7a:b1:dd:9f:89:27 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 18     link/ether d2:9c:18:9b:77:d4 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 19     link/ether f6:7c:91:78:88:80 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 20     link/ether 82:dd:6b:09:1e:c0 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 21     link/ether 4a:03:2e:8d:65:80 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 22     link/ether 3a:9a:38:01:97:1b brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 23     link/ether 6a:f7:a3:fd:10:3b brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 24     link/ether 56:ed:7b:23:57:ee brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 25     link/ether ca:fd:f3:6a:31:d7 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 26     link/ether 42:8e:c7:3c:d3:4a brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 27     link/ether fa:f3:47:90:28:3a brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 28     link/ether aa:8e:99:4f:8e:75 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 29     link/ether c2:e2:16:8d:e1:b0 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 30     link/ether 1a:b4:39:cd:3e:2b brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 31     link/ether 9e:e7:10:3e:24:f5 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 32     link/ether e2:16:ec:9f:b5:79 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 33     link/ether 62:07:d5:4a:95:38 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 34     link/ether 92:3a:95:42:b9:e2 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 35     link/ether 1e:e1:9f:39:94:7f brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 36     link/ether 4a:0f:b0:ba:0e:4a brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 37     link/ether 52:03:cc:1d:4d:97 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 38     link/ether de:6e:c1:96:99:99 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 39     link/ether fa:ea:94:40:58:70 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 40     link/ether e2:ad:25:ce:38:94 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 41     link/ether 22:7d:0e:45:58:81 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 42     link/ether b6:bf:90:65:7a:dc brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 43     link/ether a2:6a:cc:13:65:a2 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 44     link/ether 8e:5e:d5:fe:56:ed brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+    vf 45     link/ether 1e:01:f7:48:15:a9 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+
+idx vf-pci netdev driver master
+0 0000:0d:06.1 enp13s0f1v0 mlx5_core -
+1 0000:0d:06.2 enp13s0f1v1 mlx5_core -
+2 0000:0d:06.3 enp13s0f1v2 mlx5_core -
+3 0000:0d:06.4 enp13s0f1v3 mlx5_core -
+4 0000:0d:06.5 enp13s0f1v4 mlx5_core -
+5 0000:0d:06.6 enp13s0f1v5 mlx5_core -
+6 0000:0d:06.7 enp13s0f1v6 mlx5_core -
+7 0000:0d:07.0 enp13s0f1v7 mlx5_core -
+8 0000:0d:07.1 enp13s0f1v8 mlx5_core -
+9 0000:0d:07.2 enp13s0f1v9 mlx5_core -
+10 0000:0d:07.3 enp13s0f1v10 mlx5_core -
+11 0000:0d:07.4 enp13s0f1v11 mlx5_core -
+12 0000:0d:07.5 enp13s0f1v12 mlx5_core -
+13 0000:0d:07.6 enp13s0f1v13 mlx5_core -
+14 0000:0d:07.7 enp13s0f1v14 mlx5_core -
+15 0000:0d:08.0 enp13s0f1v15 mlx5_core -
+16 0000:0d:08.1 enp13s0f1v16 mlx5_core -
+17 0000:0d:08.2 enp13s0f1v17 mlx5_core -
+18 0000:0d:08.3 enp13s0f1v18 mlx5_core -
+19 0000:0d:08.4 enp13s0f1v19 mlx5_core -
+20 0000:0d:08.5 enp13s0f1v20 mlx5_core -
+21 0000:0d:08.6 enp13s0f1v21 mlx5_core -
+22 0000:0d:08.7 enp13s0f1v22 mlx5_core -
+23 0000:0d:09.0 enp13s0f1v23 mlx5_core -
+24 0000:0d:09.1 enp13s0f1v24 mlx5_core -
+25 0000:0d:09.2 enp13s0f1v25 mlx5_core -
+26 0000:0d:09.3 enp13s0f1v26 mlx5_core -
+27 0000:0d:09.4 enp13s0f1v27 mlx5_core -
+28 0000:0d:09.5 enp13s0f1v28 mlx5_core -
+29 0000:0d:09.6 enp13s0f1v29 mlx5_core -
+30 0000:0d:09.7 enp13s0f1v30 mlx5_core -
+31 0000:0d:0a.0 enp13s0f1v31 mlx5_core -
+32 0000:0d:0a.1 enp13s0f1v32 mlx5_core -
+33 0000:0d:0a.2 enp13s0f1v33 mlx5_core -
+34 0000:0d:0a.3 enp13s0f1v34 mlx5_core -
+35 0000:0d:0a.4 enp13s0f1v35 mlx5_core -
+36 0000:0d:0a.5 enp13s0f1v36 mlx5_core -
+37 0000:0d:0a.6 enp13s0f1v37 mlx5_core -
+38 0000:0d:0a.7 enp13s0f1v38 mlx5_core -
+39 0000:0d:0b.0 enp13s0f1v39 mlx5_core -
+40 0000:0d:0b.1 enp13s0f1v40 mlx5_core -
+41 0000:0d:0b.2 enp13s0f1v41 mlx5_core -
+42 0000:0d:0b.3 enp13s0f1v42 mlx5_core -
+43 0000:0d:0b.4 enp13s0f1v43 mlx5_core -
+44 0000:0d:0b.5 enp13s0f1v44 mlx5_core -
+45 0000:0d:0b.6 enp13s0f1v45 mlx5_core -
+
+===== host bridges =====
+
+$ bridge link show
+2: eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br-dpu state forwarding priority 32 cost 5 
+2: eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br-dpu hwmode VEB 
+5: eno12409np1: <BROADCAST,MULTICAST> mtu 1500 hwmode VEB 
+14: vethc1ac94cb@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+15: veth8334f8df@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+16: vethc4b42299@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+17: vethd3cd0145@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+18: veth5fc88490@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+19: veth4562d78b@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+20: vethab6e1577@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+21: veth050cec1e@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+22: veth6ace41bf@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+23: veth546aacb6@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+24: veth91f532ae@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+25: vethf8e95245@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+28: veth0438c42f@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+29: veth3bbcb412@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+30: veth0c91c3ab@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+31: veth0190de16@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+32: veth1eebdcc1@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+33: veth55ab9162@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+34: veth954498d6@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+35: vethc412a2db@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+37: vethd3f3216a@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+38: veth2a787b7e@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+39: vethb43ecced@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+40: vethcfd07f96@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+41: vethc26de519@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+42: veth0abc4e1b@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+43: vethc044f9e7@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+44: vetha375dab0@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+45: veth42f71e8c@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+46: veth7dae93e9@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+47: veth42786eec@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+48: vethf8cc6a84@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+49: veth51a59d6f@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+50: vetheb5c3227@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+51: veth48ced81d@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+52: veth2ecac959@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+53: vethddec10ed@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+55: vethadbc6a77@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+56: enp13s0f0v0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br-dpu state forwarding priority 32 cost 1 
+151: veth0e4548b8@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+152: veth426ab05c@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+161: vethe5c8ba1e@eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 master cni0 state forwarding priority 32 cost 2 
+
+===== kernel log: SR-IOV enable events =====
+
+===== files that could set sriov_numvfs at boot =====
+
+$ systemctl list-units --all --no-pager --plain sriov* mlnx* rshim* dpf* openibd*
+UNIT            LOAD   ACTIVE SUB     DESCRIPTION
+openibd.service loaded active exited  openibd - configure Mellanox devices
+rshim.service   loaded active running rshim driver for BlueField SoC
+
+LOAD   = Reflects whether the unit definition was properly loaded.
+ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
+SUB    = The low-level unit activation state, values depend on unit type.
+2 loaded units listed.
+To show all installed unit files use 'systemctl list-unit-files'.
+
+===== DPUFlavor nvconfig =====
+
+$ hk get dpuflavor -A -o jsonpath={range .items[*]}{.metadata.namespace}/{.metadata.name}{"\t"}{.spec.nvconfig}{"\n"}{end}
+dpf-operator-system/dpf-lab-ovs-flavor	[{"device":"*","parameters":["PF_BAR2_ENABLE=0","PER_PF_NUM_SF=1","PF_TOTAL_SF=20","PF_SF_BAR_SIZE=10","NUM_PF_MSIX_VALID=0","PF_NUM_PF_MSIX_VALID=1","PF_NUM_PF_MSIX=228","INTERNAL_CPU_MODEL=1","INTERNAL_CPU_OFFLOAD_ENGINE=0","SRIOV_EN=1","NUM_OF_VFS=46","LAG_RESOURCE_ALLOCATION=1","LINK_TYPE_P1=ETH","LINK_TYPE_P2=ETH"]}]
+
+===== DPF DPU -> flavor =====
+
+$ hk get dpu -A -o custom-columns=NS:.metadata.namespace,NAME:.metadata.name,FLAVOR:.spec.dpuFlavor,PHASE:.status.phase
+NS                    NAME              FLAVOR               PHASE
+dpf-operator-system   dh5-bluefield-3   dpf-lab-ovs-flavor   Ready
+
+===== pods requesting VF resources =====
+NS                              NAME                                                              NODE   MLNX     OPI
+default                         ping-host                                                         dh5    1        <none>
+
+===== DPF pods on dh5: log lines about VFs =====
+--- pod/bfb-registry
+--- pod/dh5-dms
+--- pod/dpf-operator-controller-manager-7dcf757567-jgr72
+--- pod/dpf-operator-kamaji-etcd-defrag-job-29911680-mh592
+--- pod/dpf-operator-kamaji-etcd-defrag-job-29913120-mswkd
+--- pod/dpf-provisioning-controller-manager-597796dbcc-l58c5
+--- pod/dpf-provisioning-controller-manager-597796dbcc-m29cp
+--- pod/dpu-cluster-1-7568b99586-7r5hf
+--- pod/dpu-cluster-1-7568b99586-rmzj7
+--- pod/dpu-cluster-1-7568b99586-vs5rp
+--- pod/dpu-cluster-1-keepalived-wmd54
+--- pod/dpuservice-controller-manager-8495c48dbd-pw7rx
+I1116 11:16:01.007024       1 warning_handler.go:64] "v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="9e46472f-c53c-42b7-a744-9e48fb7165c0"
+I1116 11:16:01.043574       1 dpuservice_controller.go:155] "Patching" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="9e46472f-c53c-42b7-a744-9e48fb7165c0"
+I1116 11:19:27.094574       1 dpuservice_controller.go:141] "Reconciling" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="937aaf36-a158-445d-873f-5f60bc074377"
+I1116 11:19:27.118927       1 dpuservice_controller.go:689] "Patching ImagePullSecrets for DPU clusters" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="937aaf36-a158-445d-873f-5f60bc074377"
+I1116 11:19:28.028480       1 warning_handler.go:64] "v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="937aaf36-a158-445d-873f-5f60bc074377"
+I1116 11:19:28.069460       1 dpuservice_controller.go:155] "Patching" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="937aaf36-a158-445d-873f-5f60bc074377"
+I1116 11:19:55.852333       1 dpuserviceinterface_controller.go:83] "Reconciling" controller="dpuserviceinterface" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceInterface" DPUServiceInterface="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="83bb59d4-a477-4955-9883-182426ea0764"
+I1116 11:19:55.886476       1 accessor.go:189] "skipping creation of watch dpuserviceinterface-watch-serviceinterfaceset for *v1alpha1.ServiceInterfaceSet, already exists" controller="dpuserviceinterface" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceInterface" DPUServiceInterface="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="83bb59d4-a477-4955-9883-182426ea0764"
+I1116 11:19:55.886501       1 dpuserviceinterface_controller.go:98] "Patching" controller="dpuserviceinterface" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceInterface" DPUServiceInterface="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="83bb59d4-a477-4955-9883-182426ea0764"
+I1116 11:19:55.901844       1 dpuservicechain_controller.go:77] "Reconciling" controller="dpuservicechain" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceChain" DPUServiceChain="default/vf10-to-hbn" namespace="default" name="vf10-to-hbn" reconcileID="01f436a5-defd-45e4-bff7-615e287f0821"
+I1116 11:19:55.927053       1 accessor.go:189] "skipping creation of watch dpuservicechain-watch-servicechainset for *v1alpha1.ServiceChainSet, already exists" controller="dpuservicechain" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceChain" DPUServiceChain="default/vf10-to-hbn" namespace="default" name="vf10-to-hbn" reconcileID="01f436a5-defd-45e4-bff7-615e287f0821"
+I1116 11:19:55.927097       1 dpuservicechain_controller.go:92] "Patching" controller="dpuservicechain" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceChain" DPUServiceChain="default/vf10-to-hbn" namespace="default" name="vf10-to-hbn" reconcileID="01f436a5-defd-45e4-bff7-615e287f0821"
+I1116 11:19:55.945555       1 dpuservicechain_controller.go:77] "Reconciling" controller="dpuservicechain" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceChain" DPUServiceChain="default/vf10-to-ping-sf" namespace="default" name="vf10-to-ping-sf" reconcileID="5180a017-dfd2-4b92-a738-48679200d7ba"
+I1116 11:19:55.971298       1 accessor.go:189] "skipping creation of watch dpuservicechain-watch-servicechainset for *v1alpha1.ServiceChainSet, already exists" controller="dpuservicechain" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceChain" DPUServiceChain="default/vf10-to-ping-sf" namespace="default" name="vf10-to-ping-sf" reconcileID="5180a017-dfd2-4b92-a738-48679200d7ba"
+I1116 11:19:55.971338       1 dpuservicechain_controller.go:92] "Patching" controller="dpuservicechain" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceChain" DPUServiceChain="default/vf10-to-ping-sf" namespace="default" name="vf10-to-ping-sf" reconcileID="5180a017-dfd2-4b92-a738-48679200d7ba"
+I1116 11:19:56.417484       1 dpuservice_controller.go:141] "Reconciling" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="a3b5de27-62bc-489a-87cb-857e557ccbde"
+I1116 11:19:56.432991       1 dpuservice_controller.go:689] "Patching ImagePullSecrets for DPU clusters" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="a3b5de27-62bc-489a-87cb-857e557ccbde"
+I1116 11:19:56.451056       1 warning_handler.go:64] "v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="a3b5de27-62bc-489a-87cb-857e557ccbde"
+I1116 11:19:56.453713       1 dpuservice_controller.go:155] "Patching" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="a3b5de27-62bc-489a-87cb-857e557ccbde"
+I1116 11:21:37.415011       1 dpuservice_controller.go:141] "Reconciling" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="116ffd87-7a16-4289-bb70-2bac8a99e141"
+I1116 11:21:37.432740       1 dpuservice_controller.go:689] "Patching ImagePullSecrets for DPU clusters" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="116ffd87-7a16-4289-bb70-2bac8a99e141"
+I1116 11:21:38.028562       1 warning_handler.go:64] "v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="116ffd87-7a16-4289-bb70-2bac8a99e141"
+I1116 11:21:38.034355       1 dpuservice_controller.go:155] "Patching" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="116ffd87-7a16-4289-bb70-2bac8a99e141"
+I1116 11:22:59.912111       1 dpuserviceinterface_controller.go:83] "Reconciling" controller="dpuserviceinterface" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceInterface" DPUServiceInterface="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="79523c07-82a9-452d-87ce-b3c0ff89169a"
+I1116 11:22:59.937675       1 accessor.go:189] "skipping creation of watch dpuserviceinterface-watch-serviceinterfaceset for *v1alpha1.ServiceInterfaceSet, already exists" controller="dpuserviceinterface" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceInterface" DPUServiceInterface="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="79523c07-82a9-452d-87ce-b3c0ff89169a"
+I1116 11:22:59.937718       1 dpuserviceinterface_controller.go:98] "Patching" controller="dpuserviceinterface" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUServiceInterface" DPUServiceInterface="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="79523c07-82a9-452d-87ce-b3c0ff89169a"
+I1116 11:23:50.066010       1 dpuservice_controller.go:141] "Reconciling" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="3b56931a-a901-43ff-acab-64cd65f1c44e"
+I1116 11:23:50.083879       1 dpuservice_controller.go:689] "Patching ImagePullSecrets for DPU clusters" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="3b56931a-a901-43ff-acab-64cd65f1c44e"
+I1116 11:23:50.168930       1 warning_handler.go:64] "v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="3b56931a-a901-43ff-acab-64cd65f1c44e"
+I1116 11:23:50.171419       1 dpuservice_controller.go:155] "Patching" controller="dpuservice" controllerGroup="svc.dpu.nvidia.com" controllerKind="DPUService" DPUService="dpf-operator-system/sriov-device-plugin" namespace="dpf-operator-system" name="sriov-device-plugin" reconcileID="3b56931a-a901-43ff-acab-64cd65f1c44e"
+--- pod/in-cluster-kube-state-metrics-52111ffde9-5bdcb5864c-m5fxt
+--- pod/in-cluster-nvidia-k8s-ipam-52111ffde9-758c678c8d-268wg
+--- pod/in-cluster-servicechainset-controller-52111ffde9-7d4b566b9dvpkf
+I1116 11:23:41.940445       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="259b229f-8a00-49d1-9334-965e7d853ee4" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147324","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-ping-sfgnd92","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:41Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:41.940556       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="259b229f-8a00-49d1-9334-965e7d853ee4"
+I1116 11:23:46.919346       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="ff5c8f6d-74bf-40ac-a39b-3c43aad72a95"
+I1116 11:23:46.930413       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="ff5c8f6d-74bf-40ac-a39b-3c43aad72a95" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147342","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:46Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:46.930550       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="ff5c8f6d-74bf-40ac-a39b-3c43aad72a95"
+I1116 11:23:46.946738       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/hbn-ifc" namespace="default" name="hbn-ifc" reconcileID="d2827bb6-28f4-4c1e-9ec5-4e5400a74f3c" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"hbn-ifcpf7sm","namespace":"default","uid":"4fbfc124-e9fc-455c-afeb-a1ed1ce3975b","resourceVersion":"1147344","generation":1,"creationTimestamp":"2026-11-14T12:10:10Z","labels":{"service":"hbn","svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/service-id":"hbn","svc.dpu.nvidia.com/serviceinterfaceset-name":"hbn-ifc","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"hbn-ifc","uid":"a062f312-f50c-4764-8d67-ad4c8dfb7f7e","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:21:55Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:service":{},"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/service-id":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{}},"f:ownerReferences":{"k:{\"uid\":\"a062f312-f50c-4764-8d67-ad4c8dfb7f7e\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:service":{"f:interfaceName":{},"f:network":{},"f:serviceID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:46Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"service","service":{"serviceID":"hbn","network":"dpf-operator-system/mybrhbn","interfaceName":"net0"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:46.957901       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="8f36c074-d546-4348-b803-da65538b1280"
+I1116 11:23:46.969156       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="8f36c074-d546-4348-b803-da65538b1280" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147342","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:46Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:46.969284       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="8f36c074-d546-4348-b803-da65538b1280"
+I1116 11:23:46.984390       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/hbn-ifc" namespace="default" name="hbn-ifc" reconcileID="3a6b5ac4-451c-43b8-8de3-fee24b5c33c2" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"hbn-ifcpf7sm","namespace":"default","uid":"4fbfc124-e9fc-455c-afeb-a1ed1ce3975b","resourceVersion":"1147344","generation":1,"creationTimestamp":"2026-11-14T12:10:10Z","labels":{"service":"hbn","svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/service-id":"hbn","svc.dpu.nvidia.com/serviceinterfaceset-name":"hbn-ifc","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"hbn-ifc","uid":"a062f312-f50c-4764-8d67-ad4c8dfb7f7e","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:21:55Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:service":{},"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/service-id":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{}},"f:ownerReferences":{"k:{\"uid\":\"a062f312-f50c-4764-8d67-ad4c8dfb7f7e\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:service":{"f:interfaceName":{},"f:network":{},"f:serviceID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:46Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"service","service":{"serviceID":"hbn","network":"dpf-operator-system/mybrhbn","interfaceName":"net0"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:46.990316       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="6b94adb8-7176-44a8-bf28-5aa0b66f35f7"
+I1116 11:23:47.000508       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="6b94adb8-7176-44a8-bf28-5aa0b66f35f7" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147346","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-ping-sfgnd92","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:46Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:47.000641       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="6b94adb8-7176-44a8-bf28-5aa0b66f35f7"
+I1116 11:23:47.006057       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="5d0533cc-775c-4520-92b8-1e2b8cd6da25"
+I1116 11:23:47.016354       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="5d0533cc-775c-4520-92b8-1e2b8cd6da25" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147346","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-ping-sfgnd92","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:46Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:47.016445       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="5d0533cc-775c-4520-92b8-1e2b8cd6da25"
+I1116 11:23:51.994051       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="7da325ef-f731-40ec-a1e6-11844f2b1776"
+I1116 11:23:52.004271       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="7da325ef-f731-40ec-a1e6-11844f2b1776" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147363","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:51Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:52.004396       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="7da325ef-f731-40ec-a1e6-11844f2b1776"
+I1116 11:23:52.019195       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/hbn-ifc" namespace="default" name="hbn-ifc" reconcileID="5e7a5ed6-851a-466a-984a-10b4a39da93e" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"hbn-ifcpf7sm","namespace":"default","uid":"4fbfc124-e9fc-455c-afeb-a1ed1ce3975b","resourceVersion":"1147365","generation":1,"creationTimestamp":"2026-11-14T12:10:10Z","labels":{"service":"hbn","svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/service-id":"hbn","svc.dpu.nvidia.com/serviceinterfaceset-name":"hbn-ifc","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"hbn-ifc","uid":"a062f312-f50c-4764-8d67-ad4c8dfb7f7e","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:21:55Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:service":{},"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/service-id":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{}},"f:ownerReferences":{"k:{\"uid\":\"a062f312-f50c-4764-8d67-ad4c8dfb7f7e\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:service":{"f:interfaceName":{},"f:network":{},"f:serviceID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:51Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"service","service":{"serviceID":"hbn","network":"dpf-operator-system/mybrhbn","interfaceName":"net0"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:52.024543       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="341cbc20-f28e-4640-82d8-20fe4a7015a6"
+I1116 11:23:52.033310       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="341cbc20-f28e-4640-82d8-20fe4a7015a6" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147363","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:51Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:52.033405       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="341cbc20-f28e-4640-82d8-20fe4a7015a6"
+I1116 11:23:52.046362       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/hbn-ifc" namespace="default" name="hbn-ifc" reconcileID="223c14bb-ae13-403a-89b7-7e92125bad1b" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"hbn-ifcpf7sm","namespace":"default","uid":"4fbfc124-e9fc-455c-afeb-a1ed1ce3975b","resourceVersion":"1147365","generation":1,"creationTimestamp":"2026-11-14T12:10:10Z","labels":{"service":"hbn","svc.dpu.nvidia.com/service-chain":"vf10-to-hbngx8p4","svc.dpu.nvidia.com/service-id":"hbn","svc.dpu.nvidia.com/serviceinterfaceset-name":"hbn-ifc","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"hbn-ifc","uid":"a062f312-f50c-4764-8d67-ad4c8dfb7f7e","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:21:55Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:service":{},"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/service-id":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{}},"f:ownerReferences":{"k:{\"uid\":\"a062f312-f50c-4764-8d67-ad4c8dfb7f7e\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:service":{"f:interfaceName":{},"f:network":{},"f:serviceID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T12:10:10Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:51Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"service","service":{"serviceID":"hbn","network":"dpf-operator-system/mybrhbn","interfaceName":"net0"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T12:10:10Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:52.058637       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="5fd57e4d-7ad2-4905-9e9b-d05261479ec4"
+I1116 11:23:52.067854       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="5fd57e4d-7ad2-4905-9e9b-d05261479ec4" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147367","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-ping-sfgnd92","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:52Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:52.067912       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="5fd57e4d-7ad2-4905-9e9b-d05261479ec4"
+I1116 11:23:52.073174       1 serviceinterfaceset_controller.go:77] "Reconciling" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="61d310f7-2e7c-43a3-8d63-6ced6d6aea7d"
+I1116 11:23:52.080078       1 serviceinterfaceset_controller.go:291] "ServiceInterface is updated/created" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="61d310f7-2e7c-43a3-8d63-6ced6d6aea7d" ServiceInterface={"kind":"ServiceInterface","apiVersion":"svc.dpu.nvidia.com/v1alpha1","metadata":{"name":"pf0vf10-repv6pdb","namespace":"default","uid":"ba5b1ade-4f53-458a-8b7a-4763367e93e2","resourceVersion":"1147367","generation":1,"creationTimestamp":"2026-11-14T14:09:37Z","labels":{"svc.dpu.nvidia.com/service-chain":"vf10-to-ping-sfgnd92","svc.dpu.nvidia.com/serviceinterfaceset-name":"pf0vf10-rep","svc.dpu.nvidia.com/serviceinterfaceset-namespace":"default","vf":"pf0vf10"},"ownerReferences":[{"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"ServiceInterfaceSet","name":"pf0vf10-rep","uid":"00a4179a-8baa-4ca3-b59c-6365329827cb","controller":true,"blockOwnerDeletion":true}],"finalizers":["svc.dpu.nvidia.com/ServiceInterface-finalizer"],"managedFields":[{"manager":"service-interface-set-controller","operation":"Apply","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:19:13Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-name":{},"f:svc.dpu.nvidia.com/serviceinterfaceset-namespace":{},"f:vf":{}},"f:ownerReferences":{"k:{\"uid\":\"00a4179a-8baa-4ca3-b59c-6365329827cb\"}":{}}},"f:spec":{"f:interfaceType":{},"f:node":{},"f:vf":{"f:parentInterfaceRef":{},"f:pfID":{},"f:vfID":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:finalizers":{".":{},"v:\"svc.dpu.nvidia.com/ServiceInterface-finalizer\"":{}}}}},{"manager":"serviceinterfacecontroller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-14T14:09:37Z","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:conditions":{},"f:observedGeneration":{}}},"subresource":"status"},{"manager":"sfc-controller","operation":"Update","apiVersion":"svc.dpu.nvidia.com/v1alpha1","time":"2026-11-16T11:23:52Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{"f:svc.dpu.nvidia.com/service-chain":{}}}}}]},"spec":{"node":"dh5-bluefield-3","interfaceType":"vf","vf":{"vfID":10,"pfID":0,"parentInterfaceRef":"p0-dh5-bluefield-3"}},"status":{"conditions":[{"type":"Ready","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""},{"type":"ServiceInterfaceReconciled","status":"True","observedGeneration":1,"lastTransitionTime":"2026-11-14T14:09:37Z","reason":"Success","message":""}],"observedGeneration":1}}
+I1116 11:23:52.080111       1 serviceinterfaceset_controller.go:91] "Patching" controller="serviceinterfaceset" controllerGroup="svc.dpu.nvidia.com" controllerKind="ServiceInterfaceSet" ServiceInterfaceSet="default/pf0vf10-rep" namespace="default" name="pf0vf10-rep" reconcileID="61d310f7-2e7c-43a3-8d63-6ced6d6aea7d"
+--- pod/kamaji-cm-controller-manager-5847c8b5fd-gdbtd
+--- pod/kamaji-cm-controller-manager-5847c8b5fd-j5rhw
+
+===== firmware config 0000:0d:00.0 =====
+Name:               900-9D3B6-00CV-A_Ax 
+Description:        NVIDIA BlueField-3 B3220 P-Series FHHL DPU; 200GbE (default mode) / NDR200 IB; Dual-port QSFP112; PCIe Gen5.0 x16 with x16 PCIe extension option; 16 Arm cores; 32GB on-board DDR; integrated BMC; Crypto Enabled
+Device:             0000:0d:00.0        
+
+Configurations:                                         Next Boot                        
+        NUM_OF_VFS                                      46                               
+        SRIOV_EN                                        True(1)                          
+        NUM_VF_MSIX                                     11                               
+
+===== firmware config 0000:0d:00.1 =====
+Name:               900-9D3B6-00CV-A_Ax 
+Description:        NVIDIA BlueField-3 B3220 P-Series FHHL DPU; 200GbE (default mode) / NDR200 IB; Dual-port QSFP112; PCIe Gen5.0 x16 with x16 PCIe extension option; 16 Arm cores; 32GB on-board DDR; integrated BMC; Crypto Enabled
+Device:             0000:0d:00.1        
+
+Configurations:                                         Next Boot                        
+        NUM_OF_VFS                                      46                               
+        SRIOV_EN                                        True(1)                          
+        NUM_VF_MSIX                                     11                               

@@ -1,0 +1,313 @@
+
+===== S6 static: OPI CNI / device-plugin prerequisites on dh5 =====
+--- /etc/cni/net.d
+total 24
+drwx------ 4 root root 4096 Nov 14 13:59 .
+drwxr-xr-x 4 root root 4096 Nov 12 09:33 ..
+-rw-r--r-- 1 root root  406 Nov 14 13:34 10-flannel.conflist
+-rw-r--r-- 1 root root  639 Dec 26  2021 87-podman-bridge.conflist
+drwxr-xr-x 2 root root 4096 Nov 11 19:00 multus.d
+drwxr-xr-x 2 root root 4096 Nov 11 19:00 nv-ipam.d
+--- /var/lib/rancher/k3s/agent/etc/cni/net.d
+total 28
+drwx------ 3 root root 4096 Nov 14 14:00 .
+drwxr-xr-x 3 root root 4096 Nov 12 06:41 ..
+-rw------- 1 root root  623 Nov 14 14:00 00-multus.conflist
+-rw-r--r-- 1 root root  182 Nov 14 13:45 00-multus.conflist.bak.1794664134.bak.1794664766
+-rw-r--r-- 1 root root  182 Nov 14 13:30 00-multus.conflist.bak.bak.1794664766
+-rw-r--r-- 1 root root  406 Nov 14 14:00 10-flannel.conflist
+drwxr-xr-x 2 root root 4096 Nov 16 10:36 multus.d
+--- /opt/cni/bin
+total 119064
+drwxr-xr-x 2 root root     4096 Nov 14 13:45 .
+drwxr-xr-x 3 root root     4096 Nov 11 18:21 ..
+-rwxr-xr-x 1 root root  2907995 Nov 11 18:59 flannel
+-rwxr-xr-x 1 root root 42573547 Nov 11 19:00 multus
+-rwxr-xr-x 1 root root 52318892 Nov 14 13:45 multus-shim
+-rwxr-xr-x 1 root root 15238548 Nov 11 19:00 nv-ipam
+-rwxr-xr-x 1 root root  3881931 Nov 14 13:45 passthru
+-rwxr-xr-x 1 root root  4978039 Nov 14 13:18 sriov
+--- /var/lib/rancher/k3s/data/current/bin
+total 256132
+drwxr-xr-x 3 root root     12288 Nov 12 06:41 .
+drwxr-xr-x 4 root root      4096 Nov 12 06:41 ..
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 [ -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 [[ -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 addgroup -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 adduser -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 ar -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 arch -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 arp -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 arping -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 ash -> busybox
+drwxr-xr-x 2 root root      4096 Nov 12 06:41 aux
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 awk -> busybox
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 b2sum -> coreutils
+lrwxrwxrwx 1 root root         3 Nov 12 06:41 bandwidth -> cni
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 base32 -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 base64 -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 basename -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 basenc -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 bc -> busybox
+-rwxr-xr-x 1 root root    313664 Jan  1  1970 blkid
+lrwxrwxrwx 1 root root         3 Nov 12 06:41 bridge -> cni
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 bunzip2 -> busybox
+-rwxr-xr-x 1 root root    816816 Jan  1  1970 busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 bzcat -> busybox
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 cat -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 chattr -> busybox
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 chcon -> coreutils
+-rwxr-xr-x 1 root root     14321 Jan  1  1970 check-config
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 chgrp -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 chmod -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 chown -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 chroot -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 chrt -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 chvt -> busybox
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 cksum -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 clear -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 cmp -> busybox
+-rwxr-xr-x 1 root root   5271714 Jan  1  1970 cni
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 comm -> coreutils
+-rwxr-xr-x 1 root root    200048 Jan  1  1970 conntrack
+lrwxrwxrwx 1 root root         3 Nov 12 06:41 containerd -> k3s
+-rwxr-xr-x 1 root root  14622882 Jan  1  1970 containerd-shim-runc-v2
+-rwxr-xr-x 1 root root   1335520 Jan  1  1970 coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 cp -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 cpio -> busybox
+lrwxrwxrwx 1 root root         3 Nov 12 06:41 crictl -> k3s
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 crond -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 crontab -> busybox
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 csplit -> coreutils
+lrwxrwxrwx 1 root root         3 Nov 12 06:41 ctr -> k3s
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 cut -> coreutils
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 date -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 dc -> busybox
+lrwxrwxrwx 1 root root         9 Nov 12 06:41 dd -> coreutils
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 deallocvt -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 delgroup -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 deluser -> busybox
+lrwxrwxrwx 1 root root         7 Nov 12 06:41 devmem -> busybox
+--- /var/lib/rancher/k3s/data/cni
+total 203596
+drwxr-xr-x 2 root root     4096 Nov 14 14:00 .
+drwxr-xr-x 4 root root     4096 Nov 12 06:41 ..
+-rwxr-xr-x 1 root root  5390992 Nov 14 14:00 bandwidth
+-rwxr-xr-x 1 root root  7064688 Nov 14 14:00 bond
+-rwxr-xr-x 1 root root  5872304 Nov 14 14:00 bridge
+lrwxrwxrwx 1 root root       98 Nov 12 06:41 cni -> /var/lib/rancher/k3s/data/5a9973ddf4c7ec074f657c06287e0e6a07a24ecafd6d326827f70ef1e95bdd2d/bin/cni
+-rwxr-xr-x 1 root root 11874512 Nov 14 14:00 dhcp
+-rwxr-xr-x 1 root root  5539696 Nov 14 14:00 dummy
+-rwxr-xr-x 1 root root  5848400 Nov 14 14:00 firewall
+lrwxrwxrwx 1 root root       98 Nov 12 06:41 flannel -> /var/lib/rancher/k3s/data/5a9973ddf4c7ec074f657c06287e0e6a07a24ecafd6d326827f70ef1e95bdd2d/bin/cni
+-rwxr-xr-x 1 root root  5466064 Nov 14 14:00 host-device
+-rwxr-xr-x 1 root root  4898928 Nov 14 14:00 host-local
+-rwxr-xr-x 1 root root  5556112 Nov 14 14:00 ipvlan
+-rwxr-xr-x 1 root root  3040504 Nov 14 14:00 loopback
+-rwxr-xr-x 1 root root  5580720 Nov 14 14:00 macvlan
+-rwxr-xr-x 1 root root 50265520 Nov 14 14:00 multus
+-rwxr-xr-x 1 root root 52318892 Nov 14 13:45 multus-shim
+-rwxr-xr-x 1 root root  5445392 Nov 14 14:00 portmap
+-rwxr-xr-x 1 root root  5708336 Nov 14 14:00 ptp
+-rwxr-xr-x 1 root root  3209656 Nov 14 14:00 sbr
+-rwxr-xr-x 1 root root  4978039 Nov 14 14:00 sriov
+-rwxr-xr-x 1 root root  2686104 Nov 14 14:00 static
+-rwxr-xr-x 1 root root  5682160 Nov 14 14:00 tap
+-rwxr-xr-x 1 root root  3106232 Nov 14 14:00 tuning
+-rwxr-xr-x 1 root root  5552016 Nov 14 14:00 vlan
+-rwxr-xr-x 1 root root  3326712 Nov 14 14:00 vrf
+
+===== kubelet device-plugin sockets =====
+
+$ ls -la /var/lib/kubelet/device-plugins
+total 12
+drwxr-xr-x 2 root root 4096 Nov 14 14:05 .
+drwxr-x--- 9 root root 4096 Nov 16 00:00 ..
+-rw------- 1 root root  473 Nov 14 14:05 kubelet_internal_checkpoint
+srwxr-xr-x 1 root root    0 Nov 14 14:00 kubelet.sock
+srwxr-xr-x 1 root root    0 Nov 14 14:00 nvidia.com_mlnx_sriov.sock
+
+===== OPI operator objects =====
+
+$ hk get dpuoperatorconfig -o yaml
+apiVersion: v1
+items:
+- apiVersion: config.openshift.io/v1
+  kind: DpuOperatorConfig
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"config.openshift.io/v1","kind":"DpuOperatorConfig","metadata":{"annotations":{"lifecycle.opi.nvidia.com/vendor":"nvidia","lifecycle.opi.nvidia.com/vendor-operator-version":"v26.4.0"},"name":"dpu-operator-config"},"spec":{}}
+      lifecycle.opi.nvidia.com/vendor: nvidia
+      lifecycle.opi.nvidia.com/vendor-operator-version: v26.4.0
+    creationTimestamp: "2026-11-14T08:55:27Z"
+    finalizers:
+    - config.openshift.io/dpuoperatorconfig-finalizer
+    - lifecycle.opi.nvidia.com/cleanup
+    generation: 1
+    name: dpu-operator-config
+    resourceVersion: "744023"
+    uid: e9208850-bd77-4a5a-8771-6d8bf95ee12a
+  spec: {}
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T08:55:34Z"
+      message: All DPU operator components deployed successfully
+      reason: ComponentsReady
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T08:55:35Z"
+      message: nvidia operator v26.4.0 is within the supported range [v26.4.0, v27.0.0)
+      reason: Supported
+      status: "True"
+      type: VendorOperatorSupported
+    - lastTransitionTime: "2026-11-14T10:51:08Z"
+      message: DPF CRDs, controllers, and prerequisites are healthy
+      reason: Ready
+      status: "True"
+      type: VendorOperatorReady
+    - lastTransitionTime: "2026-11-14T11:00:23Z"
+      message: NVIDIA DPU objects report phase Ready
+      reason: Ready
+      status: "True"
+      type: VendorDPUReady
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ hk -n openshift-dpu-operator get ds -o wide
+NAME         DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE    CONTAINERS   IMAGES                            SELECTOR
+dpu-daemon   0         0         0       0            0           dpu=true        2d2h   dpu-daemon   docker.io/sknrao/dpu-daemon:dev   app=dpu-daemon
+
+$ hk -n openshift-dpu-operator get ds dpu-daemon -o jsonpath={.spec.template.spec.nodeSelector}
+{"dpu":"true"}
+$ hk get node dh5 --show-labels
+NAME   STATUS   ROLES           AGE    VERSION        LABELS
+dh5    Ready    control-plane   4d4h   v1.36.4+k3s1   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=k3s,beta.kubernetes.io/os=linux,feature.node.kubernetes.io/cpu-cpuid.ADX=true,feature.node.kubernetes.io/cpu-cpuid.AESNI=true,feature.node.kubernetes.io/cpu-cpuid.AMXBF16=true,feature.node.kubernetes.io/cpu-cpuid.AMXFP8=true,feature.node.kubernetes.io/cpu-cpuid.AMXINT8=true,feature.node.kubernetes.io/cpu-cpuid.AMXTILE=true,feature.node.kubernetes.io/cpu-cpuid.AVX2=true,feature.node.kubernetes.io/cpu-cpuid.AVX512BF16=true,feature.node.kubernetes.io/cpu-cpuid.AVX512BITALG=true,feature.node.kubernetes.io/cpu-cpuid.AVX512BW=true,feature.node.kubernetes.io/cpu-cpuid.AVX512CD=true,feature.node.kubernetes.io/cpu-cpuid.AVX512DQ=true,feature.node.kubernetes.io/cpu-cpuid.AVX512F=true,feature.node.kubernetes.io/cpu-cpuid.AVX512FP16=true,feature.node.kubernetes.io/cpu-cpuid.AVX512IFMA=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VBMI2=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VBMI=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VL=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VNNI=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VPOPCNTDQ=true,feature.node.kubernetes.io/cpu-cpuid.AVX=true,feature.node.kubernetes.io/cpu-cpuid.AVXVNNI=true,feature.node.kubernetes.io/cpu-cpuid.BHI_CTRL=true,feature.node.kubernetes.io/cpu-cpuid.CETIBT=true,feature.node.kubernetes.io/cpu-cpuid.CETSS=true,feature.node.kubernetes.io/cpu-cpuid.CLDEMOTE=true,feature.node.kubernetes.io/cpu-cpuid.CMPSB_SCADBS_SHORT=true,feature.node.kubernetes.io/cpu-cpuid.CMPXCHG8=true,feature.node.kubernetes.io/cpu-cpuid.ENQCMD=true,feature.node.kubernetes.io/cpu-cpuid.FLUSH_L1D=true,feature.node.kubernetes.io/cpu-cpuid.FMA3=true,feature.node.kubernetes.io/cpu-cpuid.FSRM=true,feature.node.kubernetes.io/cpu-cpuid.FXSR=true,feature.node.kubernetes.io/cpu-cpuid.FXSROPT=true,feature.node.kubernetes.io/cpu-cpuid.GFNI=true,feature.node.kubernetes.io/cpu-cpuid.IA32_ARCH_CAP=true,feature.node.kubernetes.io/cpu-cpuid.IA32_CORE_CAP=true,feature.node.kubernetes.io/cpu-cpuid.IBPB=true,feature.node.kubernetes.io/cpu-cpuid.IDPRED_CTRL=true,feature.node.kubernetes.io/cpu-cpuid.LAHF=true,feature.node.kubernetes.io/cpu-cpuid.MD_CLEAR=true,feature.node.kubernetes.io/cpu-cpuid.MOVBE=true,feature.node.kubernetes.io/cpu-cpuid.MOVDIR64B=true,feature.node.kubernetes.io/cpu-cpuid.MOVDIRI=true,feature.node.kubernetes.io/cpu-cpuid.MOVSB_ZL=true,feature.node.kubernetes.io/cpu-cpuid.OSXSAVE=true,feature.node.kubernetes.io/cpu-cpuid.PCONFIG=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_CYCLES=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_INSTRUCTIONS=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_REFCYCLES=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_TOPDOWN_SLOTS=true,feature.node.kubernetes.io/cpu-cpuid.PSFD=true,feature.node.kubernetes.io/cpu-cpuid.RRSBA_CTRL=true,feature.node.kubernetes.io/cpu-cpuid.SERIALIZE=true,feature.node.kubernetes.io/cpu-cpuid.SHA=true,feature.node.kubernetes.io/cpu-cpuid.SPEC_CTRL_SSBD=true,feature.node.kubernetes.io/cpu-cpuid.STIBP=true,feature.node.kubernetes.io/cpu-cpuid.STOSB_SHORT=true,feature.node.kubernetes.io/cpu-cpuid.SYSCALL=true,feature.node.kubernetes.io/cpu-cpuid.SYSEE=true,feature.node.kubernetes.io/cpu-cpuid.TME=true,feature.node.kubernetes.io/cpu-cpuid.TSXLDTRK=true,feature.node.kubernetes.io/cpu-cpuid.VAES=true,feature.node.kubernetes.io/cpu-cpuid.VMX=true,feature.node.kubernetes.io/cpu-cpuid.VPCLMULQDQ=true,feature.node.kubernetes.io/cpu-cpuid.WAITPKG=true,feature.node.kubernetes.io/cpu-cpuid.WBNOINVD=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V1=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V2=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V3=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V4=true,feature.node.kubernetes.io/cpu-cpuid.X87=true,feature.node.kubernetes.io/cpu-cpuid.XGETBV1=true,feature.node.kubernetes.io/cpu-cpuid.XSAVE=true,feature.node.kubernetes.io/cpu-cpuid.XSAVEC=true,feature.node.kubernetes.io/cpu-cpuid.XSAVEOPT=true,feature.node.kubernetes.io/cpu-cpuid.XSAVES=true,feature.node.kubernetes.io/cpu-cstate.enabled=true,feature.node.kubernetes.io/cpu-hardware_multithreading=true,feature.node.kubernetes.io/cpu-model.family=6,feature.node.kubernetes.io/cpu-model.hypervisor=none,feature.node.kubernetes.io/cpu-model.id=207,feature.node.kubernetes.io/cpu-model.vendor_id=Intel,feature.node.kubernetes.io/cpu-pstate.status=passive,feature.node.kubernetes.io/cpu-pstate.turbo=true,feature.node.kubernetes.io/dpu-enabled=true,feature.node.kubernetes.io/kernel-config.NO_HZ=true,feature.node.kubernetes.io/kernel-config.NO_HZ_FULL=true,feature.node.kubernetes.io/kernel-version.full=6.8.0-149-generic,feature.node.kubernetes.io/kernel-version.major=6,feature.node.kubernetes.io/kernel-version.minor=8,feature.node.kubernetes.io/kernel-version.revision=0,feature.node.kubernetes.io/memory-numa=true,feature.node.kubernetes.io/memory-swap=true,feature.node.kubernetes.io/network-sriov.capable=true,feature.node.kubernetes.io/network-sriov.configured=true,feature.node.kubernetes.io/pci-0300_102b.present=true,feature.node.kubernetes.io/rdma.available=true,feature.node.kubernetes.io/rdma.capable=true,feature.node.kubernetes.io/storage-nonrotationaldisk=true,feature.node.kubernetes.io/system-os_release.ID=ubuntu,feature.node.kubernetes.io/system-os_release.VERSION_ID.major=22,feature.node.kubernetes.io/system-os_release.VERSION_ID.minor=04,feature.node.kubernetes.io/system-os_release.VERSION_ID=22.04,hardware.opiproject.org/profile=nvidia-bluefield,kubernetes.io/arch=amd64,kubernetes.io/hostname=dh5,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=true,node.kubernetes.io/instance-type=k3s
+
+$ hk get dataprocessingunits -o yaml
+apiVersion: v1
+items:
+- apiVersion: config.openshift.io/v1
+  kind: DataProcessingUnit
+  metadata:
+    annotations:
+      discovery.opiproject.org/product-name: BlueField-3
+      dpu.nvidia.com/bfb-url: https://content.mellanox.com/BlueField/BFBs/Ubuntu24.04/bf-bundle-3.4.0-92_26.04_ubuntu-24.04_prod.bfb
+      dpu.nvidia.com/flavor: dpf-lab-ovs-flavor
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"config.openshift.io/v1","kind":"DataProcessingUnit","metadata":{"annotations":{"dpu.nvidia.com/flavor":"dpf-lab-ovs-flavor"},"name":"dh5-bluefield-3"},"spec":{"dpuProductName":"BlueField-3","isDpuSide":false,"nodeName":"dh5"}}
+      provisioning.dpu.nvidia.com/pci-address: 0000-0d-00
+      provisioning.dpu.nvidia.com/serial-number: IL0HFWRM7403145Q00SF
+    creationTimestamp: "2026-11-14T10:19:22Z"
+    finalizers:
+    - translation.opi.nvidia.com/cleanup
+    generation: 1
+    name: dh5-bluefield-3
+    resourceVersion: "744031"
+    uid: 01d6e0ac-6b61-438a-aa6a-977b49b75791
+  spec:
+    dpuProductName: BlueField-3
+    isDpuSide: false
+    nodeName: dh5
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T11:00:24Z"
+      message: All emitted DPF objects report Ready
+      reason: AllChildrenReady
+      status: "True"
+      type: DPFReady
+    - lastTransitionTime: "2026-11-14T10:19:24Z"
+      message: BlueField-3 generation is eligible for the DPF 26.4 profile; verify
+        exact SKU, firmware, host OS and physical dataplane separately
+      reason: SupportedGeneration
+      status: "True"
+      type: DPFHardwareCompatible
+kind: List
+metadata:
+  resourceVersion: ""
+
+===== NADs =====
+
+$ hk get network-attachment-definitions.k8s.cni.cncf.io -A
+NAMESPACE                NAME                AGE
+default                  default-sriov-net   2d2h
+default                  host-vf10           46h
+openshift-dpu-operator   dpunfcni-conf       2d2h
+
+$ hk -n default get network-attachment-definitions.k8s.cni.cncf.io default-sriov-net -o yaml
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: openshift.io/dpu
+  creationTimestamp: "2026-11-14T08:55:32Z"
+  generation: 1
+  name: default-sriov-net
+  namespace: default
+  ownerReferences:
+  - apiVersion: config.openshift.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DpuOperatorConfig
+    name: dpu-operator-config
+    uid: e9208850-bd77-4a5a-8771-6d8bf95ee12a
+  resourceVersion: "710297"
+  uid: 0c75f141-d466-4dc0-bd7b-36bdb0a0857c
+spec:
+  config: '{ "type": "dpu-cni", "cniVersion": "0.4.0", "name": "dpu-cni", "ipam":
+    { "type": "whereabouts", "range": "10.56.217.0/24", "range_start": "10.56.217.50",
+    "range_end": "10.56.217.150" } }'
+
+$ hk get pods -A -o wide --field-selector spec.nodeName=dh5
+NAMESPACE                       NAME                                                              READY   STATUS              RESTARTS       AGE    IP           NODE   NOMINATED NODE   READINESS GATES
+argocd                          argo-cd-argocd-application-controller-0                           1/1     Running             1 (2d ago)     2d2h   10.42.0.27   dh5    <none>           <none>
+argocd                          argo-cd-argocd-applicationset-controller-589ffc9d7-ppzhr          1/1     Running             2 (2d ago)     4d4h   10.42.0.10   dh5    <none>           <none>
+argocd                          argo-cd-argocd-dex-server-7975c58b6c-vdbpk                        1/1     Running             2 (2d ago)     4d4h   10.42.0.11   dh5    <none>           <none>
+argocd                          argo-cd-argocd-notifications-controller-c6774f5ff-6w9zp           1/1     Running             2 (2d ago)     4d4h   10.42.0.9    dh5    <none>           <none>
+argocd                          argo-cd-argocd-redis-64d8b5c557-hw8zt                             1/1     Running             2 (2d ago)     4d4h   10.42.0.14   dh5    <none>           <none>
+argocd                          argo-cd-argocd-repo-server-76d6d774c8-4t2n7                       1/1     Running             2 (2d ago)     4d4h   10.42.0.26   dh5    <none>           <none>
+argocd                          argo-cd-argocd-server-8dbc4b4-bmlxh                               1/1     Running             2 (2d ago)     4d4h   10.42.0.8    dh5    <none>           <none>
+cert-manager                    cert-manager-55bb6b47cf-6wwws                                     1/1     Running             2 (2d ago)     4d4h   10.42.0.6    dh5    <none>           <none>
+cert-manager                    cert-manager-cainjector-7c84589448-7t7cb                          1/1     Running             2 (2d ago)     4d4h   10.42.0.19   dh5    <none>           <none>
+cert-manager                    cert-manager-webhook-7949787cd9-z95h2                             1/1     Running             2 (2d ago)     4d4h   10.42.0.7    dh5    <none>           <none>
+default                         ping-host                                                         1/1     Running             0              45h    10.42.0.57   dh5    <none>           <none>
+dpf-operator-system             bfb-registry                                                      1/1     Running             0              2d     10.42.0.43   dh5    <none>           <none>
+dpf-operator-system             dh5-dms                                                           3/3     Running             3 (2d ago)     2d2h   172.22.1.5   dh5    <none>           <none>
+dpf-operator-system             dpf-operator-controller-manager-7dcf757567-jgr72                  1/1     Running             1 (2d ago)     2d2h   10.42.0.24   dh5    <none>           <none>
+dpf-operator-system             dpf-operator-kamaji-etcd-defrag-job-29911680-mh592                0/1     ContainerCreating   0              35h    <none>       dh5    <none>           <none>
+dpf-operator-system             dpf-operator-kamaji-etcd-defrag-job-29913120-mswkd                0/1     ContainerCreating   0              11h    <none>       dh5    <none>           <none>
+dpf-operator-system             dpf-provisioning-controller-manager-597796dbcc-l58c5              1/1     Running             2 (2d ago)     2d2h   10.42.0.39   dh5    <none>           <none>
+dpf-operator-system             dpf-provisioning-controller-manager-597796dbcc-m29cp              1/1     Running             1 (2d ago)     2d2h   10.42.0.37   dh5    <none>           <none>
+dpf-operator-system             dpu-cluster-1-7568b99586-7r5hf                                    3/3     Running             3 (2d ago)     2d2h   10.42.0.34   dh5    <none>           <none>
+dpf-operator-system             dpu-cluster-1-7568b99586-rmzj7                                    3/3     Running             3 (2d ago)     2d2h   10.42.0.32   dh5    <none>           <none>
+dpf-operator-system             dpu-cluster-1-7568b99586-vs5rp                                    3/3     Running             3 (2d ago)     2d2h   10.42.0.28   dh5    <none>           <none>
+dpf-operator-system             dpu-cluster-1-keepalived-wmd54                                    1/1     Running             1 (2d ago)     2d2h   172.22.1.5   dh5    <none>           <none>
+dpf-operator-system             dpuservice-controller-manager-8495c48dbd-pw7rx                    1/1     Running             1 (2d ago)     2d2h   10.42.0.20   dh5    <none>           <none>
+dpf-operator-system             in-cluster-kube-state-metrics-52111ffde9-5bdcb5864c-m5fxt         1/1     Running             3 (2d ago)     2d2h   10.42.0.36   dh5    <none>           <none>
+dpf-operator-system             in-cluster-nvidia-k8s-ipam-52111ffde9-758c678c8d-268wg            1/1     Running             1 (2d ago)     2d2h   10.42.0.31   dh5    <none>           <none>
+dpf-operator-system             in-cluster-servicechainset-controller-52111ffde9-7d4b566b9dvpkf   1/1     Running             3 (2d ago)     2d2h   10.42.0.35   dh5    <none>           <none>
+dpf-operator-system             kamaji-cm-controller-manager-5847c8b5fd-gdbtd                     1/1     Running             1 (2d ago)     2d2h   10.42.0.22   dh5    <none>           <none>
+dpf-operator-system             kamaji-cm-controller-manager-5847c8b5fd-j5rhw                     1/1     Running             1 (2d ago)     2d2h   10.42.0.15   dh5    <none>           <none>
+kamaji-system                   kamaji-6949bc4c79-7l9ns                                           1/1     Running             1 (2d ago)     2d2h   10.42.0.25   dh5    <none>           <none>
+kamaji-system                   kamaji-etcd-0                                                     1/1     Running             1 (2d ago)     2d2h   10.42.0.41   dh5    <none>           <none>
+kamaji-system                   kamaji-etcd-1                                                     1/1     Running             1 (2d ago)     2d2h   10.42.0.29   dh5    <none>           <none>
+kamaji-system                   kamaji-etcd-2                                                     1/1     Running             1 (2d ago)     2d2h   10.42.0.18   dh5    <none>           <none>
+kube-system                     coredns-54996dc9b4-6l6rg                                          1/1     Running             2 (2d ago)     4d4h   10.42.0.3    dh5    <none>           <none>
+kube-system                     helm-install-multus-728sp                                         0/1     Completed           0              45h    <none>       dh5    <none>           <none>
+kube-system                     helm-install-traefik-crd-h6sl6                                    0/1     Completed           0              4d4h   <none>       dh5    <none>           <none>
+kube-system                     helm-install-traefik-pxf44                                        0/1     Completed           2 (4d4h ago)   4d4h   <none>       dh5    <none>           <none>
+kube-system                     local-path-provisioner-77b9867795-dx94t                           1/1     Running             2 (2d ago)     4d4h   10.42.0.2    dh5    <none>           <none>
+kube-system                     metrics-server-6dc596dfb8-whmx2                                   1/1     Running             3 (2d ago)     4d4h   10.42.0.30   dh5    <none>           <none>
+kube-system                     multus-vzm65                                                      1/1     Running             0              45h    172.22.1.5   dh5    <none>           <none>
+kube-system                     svclb-traefik-d56a2463-pwnwg                                      2/2     Running             4 (2d ago)     4d4h   10.42.0.4    dh5    <none>           <none>
+kube-system                     traefik-59b7647586-tq2vs                                          1/1     Running             2 (2d ago)     4d4h   10.42.0.5    dh5    <none>           <none>
+node-feature-discovery          node-feature-discovery-gc-5dc7495b47-kvnjw                        1/1     Running             2 (2d ago)     4d4h   10.42.0.21   dh5    <none>           <none>
+node-feature-discovery          node-feature-discovery-master-58fccc999-8hnfd                     1/1     Running             3 (2d ago)     4d4h   10.42.0.16   dh5    <none>           <none>
+node-feature-discovery          node-feature-discovery-worker-k4shz                               1/1     Running             3 (2d ago)     4d4h   10.42.0.40   dh5    <none>           <none>
+openshift-dpu-operator          dpu-operator-controller-manager-774dc85696-z9ms9                  1/1     Running             1 (2d ago)     2d2h   10.42.0.33   dh5    <none>           <none>
+openshift-dpu-operator          network-resources-injector-7c79d9d687-7cv86                       1/1     Running             1 (2d ago)     2d2h   10.42.0.17   dh5    <none>           <none>
+opi-nvidia-dpf-adapter-system   opi-nvidia-dpf-adapter-controller-manager-d995b849f-74nqs         1/1     Running             0              47h    10.42.0.47   dh5    <none>           <none>
+opi-nvidia-dpf-adapter-system   opi-nvidia-dpf-adapter-nvidia-vsp-ths45                           1/1     Running             1 (2d ago)     2d2h   10.42.0.38   dh5    <none>           <none>
+sriov-device-plugin             kube-sriov-cni-6cqsh                                              1/1     Running             0              46h    10.42.0.48   dh5    <none>           <none>
+sriov-device-plugin             kube-sriov-device-plugin-r46ds                                    1/1     Running             0              46h    172.22.1.5   dh5    <none>           <none>

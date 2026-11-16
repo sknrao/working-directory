@@ -1,0 +1,638 @@
+
+===== S3/S4 using VF 44 (spike-a 10.199.77.1/24) and VF 45 (spike-b 10.199.77.2/24) =====
+dpuserviceinterface.svc.dpu.nvidia.com/spike-pf0vf44 created
+dpuserviceinterface.svc.dpu.nvidia.com/spike-pf0vf45 created
+Ready=True Success: 
+ServiceInterfacePreReqsReady=True Success: 
+ServiceInterfaceSetReady=True Success: 
+ServiceInterfaceSetReconciled=True Success: 
+
+$ tk get serviceinterfaces.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      service: hbn
+      svc.dpu.nvidia.com/service-chain: hbn-lab-chain9dgkq
+      svc.dpu.nvidia.com/service-id: hbn
+      svc.dpu.nvidia.com/serviceinterfaceset-name: hbn-ifc
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+    name: hbn-ifcpf7sm
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: hbn-ifc
+      uid: a062f312-f50c-4764-8d67-ad4c8dfb7f7e
+    resourceVersion: "1150665"
+    uid: 4fbfc124-e9fc-455c-afeb-a1ed1ce3975b
+  spec:
+    interfaceType: service
+    node: dh5-bluefield-3
+    service:
+      interfaceName: net0
+      network: dpf-operator-system/mybrhbn
+      serviceID: hbn
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-14T14:09:37Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/service-chain: vf10-to-ping-sfgnd92
+      svc.dpu.nvidia.com/serviceinterfaceset-name: pf0vf10-rep
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+      vf: pf0vf10
+    name: pf0vf10-repv6pdb
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: pf0vf10-rep
+      uid: 00a4179a-8baa-4ca3-b59c-6365329827cb
+    resourceVersion: "1150663"
+    uid: ba5b1ade-4f53-458a-8b7a-4763367e93e2
+  spec:
+    interfaceType: vf
+    node: dh5-bluefield-3
+    vf:
+      parentInterfaceRef: p0-dh5-bluefield-3
+      pfID: 0
+      vfID: 10
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      app: ping-sf
+      svc.dpu.nvidia.com/service-chain: vf10-to-ping-sfgnd92
+      svc.dpu.nvidia.com/service-id: ping-sf
+      svc.dpu.nvidia.com/serviceinterfaceset-name: ping-sf-ifc
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+    name: ping-sf-ifcx5ccg
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: ping-sf-ifc
+      uid: f9f5c80e-2c7e-49fb-b1ca-23bc9372e82d
+    resourceVersion: "504509"
+    uid: dbe5f929-76bb-4451-a1c7-30e5f5d1a8fe
+  spec:
+    interfaceType: service
+    node: dh5-bluefield-3
+    service:
+      interfaceName: net1
+      network: default/mybrsfc-lab
+      serviceID: ping-sf
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-16T11:36:30Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      spike-role: host-vf
+      spike-vf: a
+      svc.dpu.nvidia.com/serviceinterfaceset-name: spike-pf0vf44
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+    name: spike-pf0vf44cmfqn
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: spike-pf0vf44
+      uid: 5571d892-d677-4e5a-9314-ff34cc5a5315
+    resourceVersion: "1150622"
+    uid: 95a7a389-bd2d-4f59-a255-4de3b90ef6d8
+  spec:
+    interfaceType: vf
+    node: dh5-bluefield-3
+    vf:
+      parentInterfaceRef: p0-dh5-bluefield-3
+      pfID: 0
+      vfID: 44
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-16T11:36:30Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-16T11:36:30Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-16T11:36:31Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      spike-role: host-vf
+      spike-vf: b
+      svc.dpu.nvidia.com/serviceinterfaceset-name: spike-pf0vf45
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+    name: spike-pf0vf45ww7jq
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: spike-pf0vf45
+      uid: 6e06dd40-a20e-4a43-8bfc-1a6a1d7d93ad
+    resourceVersion: "1150634"
+    uid: f7c0af89-1518-4504-aa45-e27d337482de
+  spec:
+    interfaceType: vf
+    node: dh5-bluefield-3
+    vf:
+      parentInterfaceRef: p0-dh5-bluefield-3
+      pfID: 0
+      vfID: 45
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-16T11:36:30Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-16T11:36:30Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+dpuservicechain.svc.dpu.nvidia.com/spike-chain-1 created
+Ready=False Pending: The following conditions are not ready:
+* ServiceChainSetReady
+ServiceChainSetReady=False Pending: Objects are not ready:
+* Cluster: dpf-operator-system/dpu-cluster-1
+  Object: default/spike-chain-1
+ServiceChainSetReconciled=True Success: 
+
+$ tk get servicechains.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: hbn-lab-chain
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: hbn-lab-chain9dgkq
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: hbn-lab-chain
+      uid: 8dd86943-0b3f-4fa0-87a6-8854741cc798
+    resourceVersion: "451266"
+    uid: 456a6626-d9d8-4960-982d-2b1170d4474c
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            service: hbn
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-16T11:36:46Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: spike-chain-1
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: spike-chain-1f7zqt
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: spike-chain-1
+      uid: 44efcb36-0818-4666-b056-763753261824
+    resourceVersion: "1150711"
+    uid: 05b65bb1-1c1a-4907-a3b1-4b6b3a78a21a
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            spike-role: host-vf
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-16T11:36:46Z"
+      message: |-
+        The following conditions are not ready:
+        * ServiceChainReconciled
+      observedGeneration: 1
+      reason: Pending
+      status: "False"
+      type: Ready
+    - lastTransitionTime: "2026-11-16T11:36:46Z"
+      message: 'Error occurred: expected only one serviceInterface in namespace(default)
+        to match labels(map[spike-role:host-vf]) on node(dh5-bluefield-3). found 2'
+      observedGeneration: 1
+      reason: Error
+      status: "False"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T17:20:26Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: vf10-to-hbn
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: vf10-to-hbngx8p4
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: vf10-to-hbn
+      uid: 9af102c8-c21c-4c1a-a25d-479de9a7643d
+    resourceVersion: "501595"
+    uid: 30908801-ad2f-42b0-a1f6-b61b6d81b90a
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            vf: pf0vf10
+      - serviceInterface:
+          matchLabels:
+            service: hbn
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: vf10-to-ping-sf
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: vf10-to-ping-sfgnd92
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: vf10-to-ping-sf
+      uid: af47c98a-ea5d-44dd-b223-e3d24c1617cc
+    resourceVersion: "504511"
+    uid: bbb51b05-1b63-4c31-ac05-6837691c25e8
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            vf: pf0vf10
+      - serviceInterface:
+          matchLabels:
+            app: ping-sf
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:08Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:08Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+dpuservicechain.svc.dpu.nvidia.com "spike-chain-1" deleted from default namespace
+dpuservicechain.svc.dpu.nvidia.com/spike-chain-1 created
+Ready=True Success: 
+ServiceChainSetReady=True Success: 
+ServiceChainSetReconciled=True Success: 
+
+$ tk get servicechains.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: hbn-lab-chain
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: hbn-lab-chain9dgkq
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: hbn-lab-chain
+      uid: 8dd86943-0b3f-4fa0-87a6-8854741cc798
+    resourceVersion: "451266"
+    uid: 456a6626-d9d8-4960-982d-2b1170d4474c
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            service: hbn
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-16T11:41:57Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: spike-chain-1
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: spike-chain-1zc4bl
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: spike-chain-1
+      uid: daf00bbe-09e8-45af-9005-43fc247647f3
+    resourceVersion: "1152067"
+    uid: d4edf8cf-dc32-4e02-bb48-a3d038c578f5
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            spike-vf: a
+      - serviceInterface:
+          matchLabels:
+            spike-vf: b
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-16T11:41:56Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-16T11:41:56Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T17:20:26Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: vf10-to-hbn
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: vf10-to-hbngx8p4
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: vf10-to-hbn
+      uid: 9af102c8-c21c-4c1a-a25d-479de9a7643d
+    resourceVersion: "501595"
+    uid: 30908801-ad2f-42b0-a1f6-b61b6d81b90a
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            vf: pf0vf10
+      - serviceInterface:
+          matchLabels:
+            service: hbn
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: vf10-to-ping-sf
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: vf10-to-ping-sfgnd92
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: vf10-to-ping-sf
+      uid: af47c98a-ea5d-44dd-b223-e3d24c1617cc
+    resourceVersion: "504511"
+    uid: bbb51b05-1b63-4c31-ac05-6837691c25e8
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            vf: pf0vf10
+      - serviceInterface:
+          matchLabels:
+            app: ping-sf
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:08Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:08Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""

@@ -1,0 +1,28 @@
+
+===== OVS br-sfc: baseline @ 11:36:24 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)
+
+===== OVS br-sfc: after interfaces @ 11:36:40 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)
+
+===== OVS br-sfc: chain-1 mode=single @ 11:41:52 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)
+
+===== OVS br-sfc: chain-1 mode=pair @ 11:42:03 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)
+
+===== OVS br-sfc: chain-1 + chain-2 @ 11:42:37 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)
+
+===== OVS br-sfc: chain-2 only @ 11:43:02 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)
+
+===== OVS br-sfc: no chain @ 11:43:21 =====
+Permission denied, please try again.
+(no DPU access: set DPU_HOST / DPU_USER [/ DPU_PASS] to capture OVS)

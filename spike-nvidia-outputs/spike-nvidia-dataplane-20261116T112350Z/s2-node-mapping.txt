@@ -1,0 +1,1781 @@
+
+===== S2: host node <-> DPU node mapping =====
+
+$ hk get nodes -o wide --show-labels
+NAME   STATUS   ROLES           AGE    VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION              CONTAINER-RUNTIME            LABELS
+dh5    Ready    control-plane   4d4h   v1.36.4+k3s1   172.22.1.5    <none>        Ubuntu 22.04.5 LTS   6.8.0-149-generic (amd64)   containerd://2.3.4-k3s1.36   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=k3s,beta.kubernetes.io/os=linux,feature.node.kubernetes.io/cpu-cpuid.ADX=true,feature.node.kubernetes.io/cpu-cpuid.AESNI=true,feature.node.kubernetes.io/cpu-cpuid.AMXBF16=true,feature.node.kubernetes.io/cpu-cpuid.AMXFP8=true,feature.node.kubernetes.io/cpu-cpuid.AMXINT8=true,feature.node.kubernetes.io/cpu-cpuid.AMXTILE=true,feature.node.kubernetes.io/cpu-cpuid.AVX2=true,feature.node.kubernetes.io/cpu-cpuid.AVX512BF16=true,feature.node.kubernetes.io/cpu-cpuid.AVX512BITALG=true,feature.node.kubernetes.io/cpu-cpuid.AVX512BW=true,feature.node.kubernetes.io/cpu-cpuid.AVX512CD=true,feature.node.kubernetes.io/cpu-cpuid.AVX512DQ=true,feature.node.kubernetes.io/cpu-cpuid.AVX512F=true,feature.node.kubernetes.io/cpu-cpuid.AVX512FP16=true,feature.node.kubernetes.io/cpu-cpuid.AVX512IFMA=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VBMI2=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VBMI=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VL=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VNNI=true,feature.node.kubernetes.io/cpu-cpuid.AVX512VPOPCNTDQ=true,feature.node.kubernetes.io/cpu-cpuid.AVX=true,feature.node.kubernetes.io/cpu-cpuid.AVXVNNI=true,feature.node.kubernetes.io/cpu-cpuid.BHI_CTRL=true,feature.node.kubernetes.io/cpu-cpuid.CETIBT=true,feature.node.kubernetes.io/cpu-cpuid.CETSS=true,feature.node.kubernetes.io/cpu-cpuid.CLDEMOTE=true,feature.node.kubernetes.io/cpu-cpuid.CMPSB_SCADBS_SHORT=true,feature.node.kubernetes.io/cpu-cpuid.CMPXCHG8=true,feature.node.kubernetes.io/cpu-cpuid.ENQCMD=true,feature.node.kubernetes.io/cpu-cpuid.FLUSH_L1D=true,feature.node.kubernetes.io/cpu-cpuid.FMA3=true,feature.node.kubernetes.io/cpu-cpuid.FSRM=true,feature.node.kubernetes.io/cpu-cpuid.FXSR=true,feature.node.kubernetes.io/cpu-cpuid.FXSROPT=true,feature.node.kubernetes.io/cpu-cpuid.GFNI=true,feature.node.kubernetes.io/cpu-cpuid.IA32_ARCH_CAP=true,feature.node.kubernetes.io/cpu-cpuid.IA32_CORE_CAP=true,feature.node.kubernetes.io/cpu-cpuid.IBPB=true,feature.node.kubernetes.io/cpu-cpuid.IDPRED_CTRL=true,feature.node.kubernetes.io/cpu-cpuid.LAHF=true,feature.node.kubernetes.io/cpu-cpuid.MD_CLEAR=true,feature.node.kubernetes.io/cpu-cpuid.MOVBE=true,feature.node.kubernetes.io/cpu-cpuid.MOVDIR64B=true,feature.node.kubernetes.io/cpu-cpuid.MOVDIRI=true,feature.node.kubernetes.io/cpu-cpuid.MOVSB_ZL=true,feature.node.kubernetes.io/cpu-cpuid.OSXSAVE=true,feature.node.kubernetes.io/cpu-cpuid.PCONFIG=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_CYCLES=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_INSTRUCTIONS=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_REFCYCLES=true,feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_TOPDOWN_SLOTS=true,feature.node.kubernetes.io/cpu-cpuid.PSFD=true,feature.node.kubernetes.io/cpu-cpuid.RRSBA_CTRL=true,feature.node.kubernetes.io/cpu-cpuid.SERIALIZE=true,feature.node.kubernetes.io/cpu-cpuid.SHA=true,feature.node.kubernetes.io/cpu-cpuid.SPEC_CTRL_SSBD=true,feature.node.kubernetes.io/cpu-cpuid.STIBP=true,feature.node.kubernetes.io/cpu-cpuid.STOSB_SHORT=true,feature.node.kubernetes.io/cpu-cpuid.SYSCALL=true,feature.node.kubernetes.io/cpu-cpuid.SYSEE=true,feature.node.kubernetes.io/cpu-cpuid.TME=true,feature.node.kubernetes.io/cpu-cpuid.TSXLDTRK=true,feature.node.kubernetes.io/cpu-cpuid.VAES=true,feature.node.kubernetes.io/cpu-cpuid.VMX=true,feature.node.kubernetes.io/cpu-cpuid.VPCLMULQDQ=true,feature.node.kubernetes.io/cpu-cpuid.WAITPKG=true,feature.node.kubernetes.io/cpu-cpuid.WBNOINVD=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V1=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V2=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V3=true,feature.node.kubernetes.io/cpu-cpuid.X86_64_V4=true,feature.node.kubernetes.io/cpu-cpuid.X87=true,feature.node.kubernetes.io/cpu-cpuid.XGETBV1=true,feature.node.kubernetes.io/cpu-cpuid.XSAVE=true,feature.node.kubernetes.io/cpu-cpuid.XSAVEC=true,feature.node.kubernetes.io/cpu-cpuid.XSAVEOPT=true,feature.node.kubernetes.io/cpu-cpuid.XSAVES=true,feature.node.kubernetes.io/cpu-cstate.enabled=true,feature.node.kubernetes.io/cpu-hardware_multithreading=true,feature.node.kubernetes.io/cpu-model.family=6,feature.node.kubernetes.io/cpu-model.hypervisor=none,feature.node.kubernetes.io/cpu-model.id=207,feature.node.kubernetes.io/cpu-model.vendor_id=Intel,feature.node.kubernetes.io/cpu-pstate.status=passive,feature.node.kubernetes.io/cpu-pstate.turbo=true,feature.node.kubernetes.io/dpu-enabled=true,feature.node.kubernetes.io/kernel-config.NO_HZ=true,feature.node.kubernetes.io/kernel-config.NO_HZ_FULL=true,feature.node.kubernetes.io/kernel-version.full=6.8.0-149-generic,feature.node.kubernetes.io/kernel-version.major=6,feature.node.kubernetes.io/kernel-version.minor=8,feature.node.kubernetes.io/kernel-version.revision=0,feature.node.kubernetes.io/memory-numa=true,feature.node.kubernetes.io/memory-swap=true,feature.node.kubernetes.io/network-sriov.capable=true,feature.node.kubernetes.io/network-sriov.configured=true,feature.node.kubernetes.io/pci-0300_102b.present=true,feature.node.kubernetes.io/rdma.available=true,feature.node.kubernetes.io/rdma.capable=true,feature.node.kubernetes.io/storage-nonrotationaldisk=true,feature.node.kubernetes.io/system-os_release.ID=ubuntu,feature.node.kubernetes.io/system-os_release.VERSION_ID.major=22,feature.node.kubernetes.io/system-os_release.VERSION_ID.minor=04,feature.node.kubernetes.io/system-os_release.VERSION_ID=22.04,hardware.opiproject.org/profile=nvidia-bluefield,kubernetes.io/arch=amd64,kubernetes.io/hostname=dh5,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=true,node.kubernetes.io/instance-type=k3s
+
+$ hk get dpu -A -o custom-columns=NS:.metadata.namespace,NAME:.metadata.name,DPUNODE:.spec.dpuNodeName,PHASE:.status.phase,PCI:.spec.pciAddress
+NS                    NAME              DPUNODE   PHASE   PCI
+dpf-operator-system   dh5-bluefield-3   dh5       Ready   0000-0d-00
+
+$ hk get dpu -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: provisioning.dpu.nvidia.com/v1alpha1
+  kind: DPU
+  metadata:
+    creationTimestamp: "2026-11-14T10:19:23Z"
+    finalizers:
+    - provisioning.dpu.nvidia.com/dpu-protection
+    generation: 2
+    labels:
+      provisioning.dpu.nvidia.com/dpunode-name: dh5
+      translation.opi.nvidia.com/mapping: dataprocessingunit
+      translation.opi.nvidia.com/source-kind: DataProcessingUnit
+      translation.opi.nvidia.com/source-name: dh5-bluefield-3
+    name: dh5-bluefield-3
+    namespace: dpf-operator-system
+    ownerReferences:
+    - apiVersion: config.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DataProcessingUnit
+      name: dh5-bluefield-3
+      uid: 01d6e0ac-6b61-438a-aa6a-977b49b75791
+    resourceVersion: "844667"
+    uid: c599bb73-3706-48a4-86f3-3a19003ad5b7
+  spec:
+    bfb: bf-bundle
+    cluster:
+      name: dpu-cluster-1
+      namespace: dpf-operator-system
+    dpuDeviceName: il0hfwrm7403145q00sf
+    dpuFlavor: dpf-lab-ovs-flavor
+    dpuNodeName: dh5
+    nodeEffect:
+      applyOnLabelChange: false
+      force: false
+      noEffect: true
+    pciAddress: 0000-0d-00
+    serialNumber: IL0HFWRM7403145Q00SF
+  status:
+    addresses:
+    - address: 172.22.222.8
+      type: InternalIP
+    - address: dh5-bluefield-3
+      type: Hostname
+    agentLastStartupTime: "2026-11-14T10:50:34Z"
+    agentStatus:
+      conditions:
+      - lastTransitionTime: "2026-11-14T10:44:15Z"
+        message: ""
+        reason: KernelModuleLoaded
+        status: "True"
+        type: KernelModuleLoaded
+      - lastTransitionTime: "2026-11-14T10:44:27Z"
+        message: ""
+        reason: NetworkConfigured
+        status: "True"
+        type: NetworkConfigured
+      - lastTransitionTime: "2026-11-14T10:44:27Z"
+        message: ""
+        reason: NetworkChecked
+        status: "True"
+        type: NetworkChecked
+      - lastTransitionTime: "2026-11-14T10:44:27Z"
+        message: ""
+        reason: LastStartupTimeReported
+        status: "True"
+        type: LastStartupTimeReported
+      - lastTransitionTime: "2026-11-14T10:44:27Z"
+        message: ""
+        reason: DPURetrieved
+        status: "True"
+        type: DPURetrieved
+      - lastTransitionTime: "2026-11-14T10:44:27Z"
+        message: ""
+        reason: DNSConfigured
+        status: "True"
+        type: DNSConfigured
+      - lastTransitionTime: "2026-11-14T10:44:29Z"
+        message: ""
+        reason: StaticFilesVerified
+        status: "True"
+        type: StaticFilesVerified
+      - lastTransitionTime: "2026-11-14T10:44:29Z"
+        message: ""
+        reason: BuiltinKubeletRemoved
+        status: "True"
+        type: BuiltinKubeletRemoved
+      - lastTransitionTime: "2026-11-14T10:44:29Z"
+        message: ""
+        reason: SysctlParametersSet
+        status: "True"
+        type: SysctlParametersSet
+      - lastTransitionTime: "2026-11-14T10:44:29Z"
+        message: ""
+        reason: SysctlParametersChecked
+        status: "True"
+        type: SysctlParametersChecked
+      - lastTransitionTime: "2026-11-14T10:44:30Z"
+        message: ""
+        reason: KernelCmdLineConfigured
+        status: "True"
+        type: KernelCmdLineConfigured
+      - lastTransitionTime: "2026-11-14T10:44:31Z"
+        message: ""
+        reason: ContainerdConfigured
+        status: "True"
+        type: ContainerdConfigured
+      - lastTransitionTime: "2026-11-14T10:44:32Z"
+        message: ""
+        reason: DpuModeEnsured
+        status: "True"
+        type: DpuModeEnsured
+      - lastTransitionTime: "2026-11-14T10:44:49Z"
+        message: ""
+        reason: NVConfigApplied
+        status: "True"
+        type: NVConfigApplied
+      - lastTransitionTime: "2026-11-14T10:44:49Z"
+        message: ""
+        reason: NoAction
+        status: "True"
+        type: RebootMethodDiscovery
+      - lastTransitionTime: "2026-11-14T10:51:18Z"
+        message: 'device=/dev/mst/mt41692_pciconf0 pending NVCONFIG params did not
+          take effect after reboot: [VIRTIO_BLK_EMULATION_NUM_MSIX(default=2,current=0,next=2),VIRTIO_FS_EMULATION_NUM_MSIX(default=2,current=0,next=2),VIRTIO_NET_EMULATION_NUM_MSIX(default=2,current=0,next=2)];
+          reset ignored because no other reset reasons remain.device=/dev/mst/mt41692_pciconf0.1
+          pending NVCONFIG params did not take effect after reboot: [VIRTIO_BLK_EMULATION_NUM_MSIX(default=2,current=0,next=2),VIRTIO_FS_EMULATION_NUM_MSIX(default=2,current=0,next=2),VIRTIO_NET_EMULATION_NUM_MSIX(default=2,current=0,next=2)];
+          reset ignored because no other reset reasons remain.'
+        reason: RebootHandled
+        status: "True"
+        type: RebootHandled
+      - lastTransitionTime: "2026-11-14T10:51:18Z"
+        message: ""
+        reason: KernelCmdLineChecked
+        status: "True"
+        type: KernelCmdLineChecked
+      - lastTransitionTime: "2026-11-14T10:52:07Z"
+        message: ""
+        reason: SFCreated
+        status: "True"
+        type: SFCreated
+      - lastTransitionTime: "2026-11-14T10:53:41Z"
+        message: ""
+        reason: VFMacSet
+        status: "True"
+        type: VFMacSet
+      - lastTransitionTime: "2026-11-14T10:53:59Z"
+        message: ""
+        reason: OVSScriptRun
+        status: "True"
+        type: OVSScriptRun
+      - lastTransitionTime: "2026-11-14T10:54:29Z"
+        message: ""
+        reason: BridgeChecked
+        status: "True"
+        type: BridgeChecked
+      - lastTransitionTime: "2026-11-14T10:59:50Z"
+        message: ""
+        reason: KubeletConfigured
+        status: "True"
+        type: KubeletConfigured
+      - lastTransitionTime: "2026-11-14T10:59:50Z"
+        message: ""
+        reason: KubeletStarted
+        status: "True"
+        type: KubeletStarted
+      initialBootID: a74f951b-eed5-4ead-897e-ed432ecc63ad
+      kubeletVersion: v1.34.8
+      lastObservedPendingNvconfig:
+        bootID: 068a0ae3-cbb3-47b3-8896-402a80e388ff
+        devices:
+        - device: /dev/mst/mt41692_pciconf0
+          entries:
+          - current: "0"
+            default: "2"
+            name: VIRTIO_BLK_EMULATION_NUM_MSIX
+            next_boot: "2"
+          - current: "0"
+            default: "2"
+            name: VIRTIO_FS_EMULATION_NUM_MSIX
+            next_boot: "2"
+          - current: "0"
+            default: "2"
+            name: VIRTIO_NET_EMULATION_NUM_MSIX
+            next_boot: "2"
+        - device: /dev/mst/mt41692_pciconf0.1
+          entries:
+          - current: "0"
+            default: "2"
+            name: VIRTIO_BLK_EMULATION_NUM_MSIX
+            next_boot: "2"
+          - current: "0"
+            default: "2"
+            name: VIRTIO_FS_EMULATION_NUM_MSIX
+            next_boot: "2"
+          - current: "0"
+            default: "2"
+            name: VIRTIO_NET_EMULATION_NUM_MSIX
+            next_boot: "2"
+      lastStartupTime: "2026-11-14T10:50:34Z"
+      rebootMethod: NoAction
+      rebootSequenceCount: 0
+    bfCFGFile: /bfb/bfcfg/dpf-operator-system_dh5-bluefield-3_c599bb73-3706-48a4-86f3-3a19003ad5b7
+    bfbFile: /bfb/dpf-operator-system-bf-bundle.bfb
+    conditions:
+    - lastTransitionTime: "2026-11-14T11:00:23Z"
+      message: ""
+      observedGeneration: 2
+      reason: DPUReady
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T10:20:47Z"
+      message: ""
+      observedGeneration: 2
+      reason: BFBPrepared
+      status: "True"
+      type: BFBPrepared
+    - lastTransitionTime: "2026-11-14T10:20:43Z"
+      message: ""
+      observedGeneration: 2
+      reason: BFBReady
+      status: "True"
+      type: BFBReady
+    - lastTransitionTime: "2026-11-14T11:00:22Z"
+      message: cluster configured
+      observedGeneration: 2
+      reason: DPUClusterReady
+      status: "True"
+      type: DPUClusterReady
+    - lastTransitionTime: "2026-11-14T10:20:43Z"
+      message: ""
+      observedGeneration: 2
+      reason: DPUFlavorExists
+      status: "True"
+      type: DPUFlavorExists
+    - lastTransitionTime: "2026-11-14T10:19:23Z"
+      message: ""
+      observedGeneration: 2
+      reason: Initialized
+      status: "True"
+      type: Initialized
+    - lastTransitionTime: "2026-11-14T10:20:44Z"
+      message: ""
+      observedGeneration: 2
+      reason: NodeEffectCompleted
+      status: "True"
+      type: NodeEffectReady
+    - lastTransitionTime: "2026-11-14T11:00:23Z"
+      message: ""
+      observedGeneration: 2
+      reason: NodeEffectRemoved
+      status: "True"
+      type: NodeEffectRemoved
+    - lastTransitionTime: "2026-11-14T10:20:43Z"
+      message: ""
+      observedGeneration: 2
+      reason: Pending
+      status: "True"
+      type: Pending
+    - lastTransitionTime: "2026-11-14T10:20:47Z"
+      message: ""
+      reason: FWConfigured
+      status: "True"
+      type: FWConfigured
+    - lastTransitionTime: "2026-11-14T13:36:31Z"
+      message: ""
+      reason: HostNetworkReady
+      status: "True"
+      type: HostNetworkReady
+    - lastTransitionTime: "2026-11-14T10:20:45Z"
+      message: ""
+      reason: InterfaceInitialized
+      status: "True"
+      type: InterfaceInitialized
+    - lastTransitionTime: "2026-11-14T10:44:47Z"
+      message: ""
+      reason: OSInstalled
+      status: "True"
+      type: OSInstalled
+    - lastTransitionTime: "2026-11-14T10:50:31Z"
+      message: ""
+      reason: Rebooted
+      status: "True"
+      type: Rebooted
+    dpfVersion: v26.4.0
+    dpuInstallInterface: hostAgent
+    dpuMode: dpu
+    dpuType: Unknown
+    firmware: {}
+    observedGeneration: 2
+    operationalConditions:
+    - lastTransitionTime: "2026-11-14T11:00:22Z"
+      message: All node health checks passing (9 Conditions)
+      reason: NoProblemsDetected
+      status: "True"
+      type: NodeProblemsReady
+    - lastTransitionTime: "2026-11-14T11:00:22Z"
+      message: All critical Pods are ready (0)
+      reason: AllPodsReady
+      status: "True"
+      type: DPUServiceCriticalPodsReady
+    - lastTransitionTime: "2026-11-14T12:18:32Z"
+      message: All Pods are ready (2)
+      reason: AllPodsReady
+      status: "True"
+      type: DPUServiceNonCriticalPodsReady
+    - lastTransitionTime: "2026-11-14T11:00:22Z"
+      message: All ServiceInterfaces are ready (0)
+      reason: AllServiceInterfacesReady
+      status: "True"
+      type: DPUServiceInterfacesReady
+    - lastTransitionTime: "2026-11-14T11:00:22Z"
+      message: All ServiceChains are ready (0)
+      reason: AllServiceChainsReady
+      status: "True"
+      type: DPUServiceChainsReady
+    - lastTransitionTime: "2026-11-14T12:18:32Z"
+      message: All operational conditions are ready
+      reason: AllReady
+      status: "True"
+      type: OperationalReady
+    phase: Ready
+    previousPhase: Node Effect Removal
+    secureBoot:
+      enabled: false
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ hk get dpunodes.provisioning.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: provisioning.dpu.nvidia.com/v1alpha1
+  kind: DPUNode
+  metadata:
+    annotations:
+      alpha.kubernetes.io/provided-node-ip: 172.22.1.5
+      flannel.alpha.coreos.com/backend-data: '{"VNI":1,"VtepMAC":"7a:62:30:20:34:c2"}'
+      flannel.alpha.coreos.com/backend-type: vxlan
+      flannel.alpha.coreos.com/kube-subnet-manager: "true"
+      flannel.alpha.coreos.com/public-ip: 172.22.1.5
+      k3s.io/hostname: dh5
+      k3s.io/internal-ip: 172.22.1.5
+      k3s.io/node-args: '["server","--kube-apiserver-arg","anonymous-auth=true"]'
+      k3s.io/node-config-hash: YLHYROOWOQ6ORJ6UQLJ7AW6O4UHCADB4BTCHFSSP3AMN5ISWSDJA====
+      k3s.io/node-env: '{}'
+      nfd.node.kubernetes.io/feature-labels: cpu-cpuid.ADX,cpu-cpuid.AESNI,cpu-cpuid.AMXBF16,cpu-cpuid.AMXFP8,cpu-cpuid.AMXINT8,cpu-cpuid.AMXTILE,cpu-cpuid.AVX,cpu-cpuid.AVX2,cpu-cpuid.AVX512BF16,cpu-cpuid.AVX512BITALG,cpu-cpuid.AVX512BW,cpu-cpuid.AVX512CD,cpu-cpuid.AVX512DQ,cpu-cpuid.AVX512F,cpu-cpuid.AVX512FP16,cpu-cpuid.AVX512IFMA,cpu-cpuid.AVX512VBMI,cpu-cpuid.AVX512VBMI2,cpu-cpuid.AVX512VL,cpu-cpuid.AVX512VNNI,cpu-cpuid.AVX512VPOPCNTDQ,cpu-cpuid.AVXVNNI,cpu-cpuid.BHI_CTRL,cpu-cpuid.CETIBT,cpu-cpuid.CETSS,cpu-cpuid.CLDEMOTE,cpu-cpuid.CMPSB_SCADBS_SHORT,cpu-cpuid.CMPXCHG8,cpu-cpuid.ENQCMD,cpu-cpuid.FLUSH_L1D,cpu-cpuid.FMA3,cpu-cpuid.FSRM,cpu-cpuid.FXSR,cpu-cpuid.FXSROPT,cpu-cpuid.GFNI,cpu-cpuid.IA32_ARCH_CAP,cpu-cpuid.IA32_CORE_CAP,cpu-cpuid.IBPB,cpu-cpuid.IDPRED_CTRL,cpu-cpuid.LAHF,cpu-cpuid.MD_CLEAR,cpu-cpuid.MOVBE,cpu-cpuid.MOVDIR64B,cpu-cpuid.MOVDIRI,cpu-cpuid.MOVSB_ZL,cpu-cpuid.OSXSAVE,cpu-cpuid.PCONFIG,cpu-cpuid.PMU_FIXEDCOUNTER_CYCLES,cpu-cpuid.PMU_FIXEDCOUNTER_INSTRUCTIONS,cpu-cpuid.PMU_FIXEDCOUNTER_REFCYCLES,cpu-cpuid.PMU_FIXEDCOUNTER_TOPDOWN_SLOTS,cpu-cpuid.PSFD,cpu-cpuid.RRSBA_CTRL,cpu-cpuid.SERIALIZE,cpu-cpuid.SHA,cpu-cpuid.SPEC_CTRL_SSBD,cpu-cpuid.STIBP,cpu-cpuid.STOSB_SHORT,cpu-cpuid.SYSCALL,cpu-cpuid.SYSEE,cpu-cpuid.TME,cpu-cpuid.TSXLDTRK,cpu-cpuid.VAES,cpu-cpuid.VMX,cpu-cpuid.VPCLMULQDQ,cpu-cpuid.WAITPKG,cpu-cpuid.WBNOINVD,cpu-cpuid.X86_64_V1,cpu-cpuid.X86_64_V2,cpu-cpuid.X86_64_V3,cpu-cpuid.X86_64_V4,cpu-cpuid.X87,cpu-cpuid.XGETBV1,cpu-cpuid.XSAVE,cpu-cpuid.XSAVEC,cpu-cpuid.XSAVEOPT,cpu-cpuid.XSAVES,cpu-cstate.enabled,cpu-hardware_multithreading,cpu-model.family,cpu-model.hypervisor,cpu-model.id,cpu-model.vendor_id,cpu-pstate.status,cpu-pstate.turbo,dpu-enabled,hardware.opiproject.org/profile,kernel-config.NO_HZ,kernel-config.NO_HZ_FULL,kernel-version.full,kernel-version.major,kernel-version.minor,kernel-version.revision,memory-numa,memory-swap,network-sriov.capable,network-sriov.configured,pci-0300_102b.present,rdma.available,rdma.capable,storage-nonrotationaldisk,system-os_release.ID,system-os_release.VERSION_ID,system-os_release.VERSION_ID.major,system-os_release.VERSION_ID.minor
+      node.alpha.kubernetes.io/ttl: "0"
+      volumes.kubernetes.io/controller-managed-attach-detach: "true"
+    creationTimestamp: "2026-11-12T07:11:45Z"
+    finalizers:
+    - provisioning.dpu.nvidia.com/dpunode-protection
+    generation: 1
+    labels:
+      beta.kubernetes.io/arch: amd64
+      beta.kubernetes.io/instance-type: k3s
+      beta.kubernetes.io/os: linux
+      feature.node.kubernetes.io/cpu-cpuid.ADX: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AESNI: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AMXBF16: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AMXFP8: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AMXINT8: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AMXTILE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX2: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512BF16: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512BITALG: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512BW: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512CD: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512DQ: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512F: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512FP16: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512IFMA: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512VBMI: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512VBMI2: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512VL: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512VNNI: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVX512VPOPCNTDQ: "true"
+      feature.node.kubernetes.io/cpu-cpuid.AVXVNNI: "true"
+      feature.node.kubernetes.io/cpu-cpuid.BHI_CTRL: "true"
+      feature.node.kubernetes.io/cpu-cpuid.CETIBT: "true"
+      feature.node.kubernetes.io/cpu-cpuid.CETSS: "true"
+      feature.node.kubernetes.io/cpu-cpuid.CLDEMOTE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.CMPSB_SCADBS_SHORT: "true"
+      feature.node.kubernetes.io/cpu-cpuid.CMPXCHG8: "true"
+      feature.node.kubernetes.io/cpu-cpuid.ENQCMD: "true"
+      feature.node.kubernetes.io/cpu-cpuid.FLUSH_L1D: "true"
+      feature.node.kubernetes.io/cpu-cpuid.FMA3: "true"
+      feature.node.kubernetes.io/cpu-cpuid.FSRM: "true"
+      feature.node.kubernetes.io/cpu-cpuid.FXSR: "true"
+      feature.node.kubernetes.io/cpu-cpuid.FXSROPT: "true"
+      feature.node.kubernetes.io/cpu-cpuid.GFNI: "true"
+      feature.node.kubernetes.io/cpu-cpuid.IA32_ARCH_CAP: "true"
+      feature.node.kubernetes.io/cpu-cpuid.IA32_CORE_CAP: "true"
+      feature.node.kubernetes.io/cpu-cpuid.IBPB: "true"
+      feature.node.kubernetes.io/cpu-cpuid.IDPRED_CTRL: "true"
+      feature.node.kubernetes.io/cpu-cpuid.LAHF: "true"
+      feature.node.kubernetes.io/cpu-cpuid.MD_CLEAR: "true"
+      feature.node.kubernetes.io/cpu-cpuid.MOVBE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.MOVDIR64B: "true"
+      feature.node.kubernetes.io/cpu-cpuid.MOVDIRI: "true"
+      feature.node.kubernetes.io/cpu-cpuid.MOVSB_ZL: "true"
+      feature.node.kubernetes.io/cpu-cpuid.OSXSAVE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.PCONFIG: "true"
+      feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_CYCLES: "true"
+      feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_INSTRUCTIONS: "true"
+      feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_REFCYCLES: "true"
+      feature.node.kubernetes.io/cpu-cpuid.PMU_FIXEDCOUNTER_TOPDOWN_SLOTS: "true"
+      feature.node.kubernetes.io/cpu-cpuid.PSFD: "true"
+      feature.node.kubernetes.io/cpu-cpuid.RRSBA_CTRL: "true"
+      feature.node.kubernetes.io/cpu-cpuid.SERIALIZE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.SHA: "true"
+      feature.node.kubernetes.io/cpu-cpuid.SPEC_CTRL_SSBD: "true"
+      feature.node.kubernetes.io/cpu-cpuid.STIBP: "true"
+      feature.node.kubernetes.io/cpu-cpuid.STOSB_SHORT: "true"
+      feature.node.kubernetes.io/cpu-cpuid.SYSCALL: "true"
+      feature.node.kubernetes.io/cpu-cpuid.SYSEE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.TME: "true"
+      feature.node.kubernetes.io/cpu-cpuid.TSXLDTRK: "true"
+      feature.node.kubernetes.io/cpu-cpuid.VAES: "true"
+      feature.node.kubernetes.io/cpu-cpuid.VMX: "true"
+      feature.node.kubernetes.io/cpu-cpuid.VPCLMULQDQ: "true"
+      feature.node.kubernetes.io/cpu-cpuid.WAITPKG: "true"
+      feature.node.kubernetes.io/cpu-cpuid.WBNOINVD: "true"
+      feature.node.kubernetes.io/cpu-cpuid.X86_64_V1: "true"
+      feature.node.kubernetes.io/cpu-cpuid.X86_64_V2: "true"
+      feature.node.kubernetes.io/cpu-cpuid.X86_64_V3: "true"
+      feature.node.kubernetes.io/cpu-cpuid.X86_64_V4: "true"
+      feature.node.kubernetes.io/cpu-cpuid.X87: "true"
+      feature.node.kubernetes.io/cpu-cpuid.XGETBV1: "true"
+      feature.node.kubernetes.io/cpu-cpuid.XSAVE: "true"
+      feature.node.kubernetes.io/cpu-cpuid.XSAVEC: "true"
+      feature.node.kubernetes.io/cpu-cpuid.XSAVEOPT: "true"
+      feature.node.kubernetes.io/cpu-cpuid.XSAVES: "true"
+      feature.node.kubernetes.io/cpu-cstate.enabled: "true"
+      feature.node.kubernetes.io/cpu-hardware_multithreading: "true"
+      feature.node.kubernetes.io/cpu-model.family: "6"
+      feature.node.kubernetes.io/cpu-model.hypervisor: none
+      feature.node.kubernetes.io/cpu-model.id: "207"
+      feature.node.kubernetes.io/cpu-model.vendor_id: Intel
+      feature.node.kubernetes.io/cpu-pstate.status: passive
+      feature.node.kubernetes.io/cpu-pstate.turbo: "true"
+      feature.node.kubernetes.io/dpu-enabled: "true"
+      feature.node.kubernetes.io/kernel-config.NO_HZ: "true"
+      feature.node.kubernetes.io/kernel-config.NO_HZ_FULL: "true"
+      feature.node.kubernetes.io/kernel-version.full: 6.8.0-149-generic
+      feature.node.kubernetes.io/kernel-version.major: "6"
+      feature.node.kubernetes.io/kernel-version.minor: "8"
+      feature.node.kubernetes.io/kernel-version.revision: "0"
+      feature.node.kubernetes.io/memory-numa: "true"
+      feature.node.kubernetes.io/memory-swap: "true"
+      feature.node.kubernetes.io/network-sriov.capable: "true"
+      feature.node.kubernetes.io/network-sriov.configured: "true"
+      feature.node.kubernetes.io/pci-0300_102b.present: "true"
+      feature.node.kubernetes.io/rdma.available: "true"
+      feature.node.kubernetes.io/rdma.capable: "true"
+      feature.node.kubernetes.io/storage-nonrotationaldisk: "true"
+      feature.node.kubernetes.io/system-os_release.ID: ubuntu
+      feature.node.kubernetes.io/system-os_release.VERSION_ID: "22.04"
+      feature.node.kubernetes.io/system-os_release.VERSION_ID.major: "22"
+      feature.node.kubernetes.io/system-os_release.VERSION_ID.minor: "04"
+      hardware.opiproject.org/profile: nvidia-bluefield
+      kubernetes.io/arch: amd64
+      kubernetes.io/hostname: dh5
+      kubernetes.io/os: linux
+      node-role.kubernetes.io/control-plane: "true"
+      node.kubernetes.io/instance-type: k3s
+      operator.dpu.nvidia.com/dpf-version: v26.4.0
+    name: dh5
+    namespace: dpf-operator-system
+    ownerReferences:
+    - apiVersion: v1
+      controller: true
+      kind: Node
+      name: dh5
+      uid: 7f2a8376-16ac-4375-972c-37c92636ac94
+    resourceVersion: "744013"
+    uid: e238b190-0df5-4435-84c2-94496e910741
+  spec:
+    dpus:
+    - name: il0hfwrm7403145q00sf
+    nodeRebootMethod:
+      hostAgent: {}
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T11:00:22Z"
+      message: ""
+      observedGeneration: 1
+      reason: Ready
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-12T07:11:46Z"
+      message: ""
+      reason: OOBBridgeConfigured
+      status: "True"
+      type: OOBBridgeConfigured
+    dpuInstallInterface: hostAgent
+    kubeNodeRef: dh5
+    rebootInProgress: false
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ hk get dpudevice -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: provisioning.dpu.nvidia.com/v1alpha1
+  kind: DPUDevice
+  metadata:
+    creationTimestamp: "2026-11-14T08:56:12Z"
+    finalizers:
+    - provisioning.dpu.nvidia.com/dpudevice-protection
+    generation: 1
+    labels:
+      provisioning.dpu.nvidia.com/dpudevice-num-of-pfs: "2"
+      provisioning.dpu.nvidia.com/dpudevice-pciAddress: 0000-0d-00
+      provisioning.dpu.nvidia.com/dpudevice-pf0-name: enp13s0f0np0
+      provisioning.dpu.nvidia.com/dpunode-name: dh5
+      translation.opi.nvidia.com/mapping: dataprocessingunit
+      translation.opi.nvidia.com/source-kind: DataProcessingUnit
+      translation.opi.nvidia.com/source-name: dh5-bluefield-3
+    name: il0hfwrm7403145q00sf
+    namespace: dpf-operator-system
+    ownerReferences:
+    - apiVersion: config.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DataProcessingUnit
+      name: dh5-bluefield-3
+      uid: 01d6e0ac-6b61-438a-aa6a-977b49b75791
+    resourceVersion: "733120"
+    uid: 5a4b6c05-4446-42c4-98ad-3f35e72fe764
+  spec:
+    bmcPort: 443
+    numberOfPFs: 2
+    serialNumber: IL0HFWRM7403145Q00SF
+  status:
+    bmcPort: 443
+    conditions:
+    - lastTransitionTime: "2026-11-14T08:56:12Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T08:56:12Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Discovered
+    - lastTransitionTime: "2026-11-14T08:56:12Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: NodeAttached
+    dpuMode: dpu
+    dpuType: Unknown
+    pciAddress: 0000-0d-00
+    pf0Name: enp13s0f0np0
+    secureBoot:
+      enabled: false
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ hk get dpucluster -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: provisioning.dpu.nvidia.com/v1alpha1
+  kind: DPUCluster
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"provisioning.dpu.nvidia.com/v1alpha1","kind":"DPUCluster","metadata":{"annotations":{},"name":"dpu-cluster-1","namespace":"dpf-operator-system"},"spec":{"clusterEndpoint":{"keepalived":{"interface":"br-dpu","nodeSelector":{"node-role.kubernetes.io/control-plane":"true"},"vip":"172.22.1.200","virtualRouterID":126}},"maxNodes":10,"type":"kamaji"}}
+    creationTimestamp: "2026-11-14T08:56:40Z"
+    finalizers:
+    - provisioning.dpu.nvidia.com/cluster-manager-internal-clean-up
+    - provisioning.dpu.nvidia.com/cluster-manager-clean-up
+    generation: 2
+    name: dpu-cluster-1
+    namespace: dpf-operator-system
+    resourceVersion: "741610"
+    uid: efd0018c-820d-40b4-bfbe-a055ba351f88
+  spec:
+    clusterEndpoint:
+      keepalived:
+        interface: br-dpu
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: "true"
+        vip: 172.22.1.200
+        virtualRouterID: 126
+    kubeconfig: dpu-cluster-1-admin-kubeconfig
+    maxNodes: 10
+    type: kamaji
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T08:56:53Z"
+      message: ""
+      reason: Created
+      status: "True"
+      type: Created
+    - lastTransitionTime: "2026-11-14T08:56:40Z"
+      message: ""
+      reason: Deployed
+      status: "True"
+      type: KeepalivedReady
+    - lastTransitionTime: "2026-11-14T08:57:03Z"
+      message: ""
+      reason: HealthCheckPassed
+      status: "True"
+      type: Ready
+    nodesCount: 1
+    phase: Ready
+    version: v1.34.0
+kind: List
+metadata:
+  resourceVersion: ""
+
+===== existing host-side DPF service objects =====
+
+$ hk get dpuserviceinterfaces.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: DPUServiceInterface
+  metadata:
+    annotations:
+      dpu.nvidia.com/consumed-by: hbn
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/dpuserviceinterface
+    generation: 2
+    labels:
+      translation.opi.nvidia.com/mapping: servicefunctionchain
+      translation.opi.nvidia.com/source-kind: ServiceFunctionChain
+      translation.opi.nvidia.com/source-name: hbn-lab-chain
+    name: hbn-ifc
+    namespace: default
+    ownerReferences:
+    - apiVersion: config.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceFunctionChain
+      name: hbn-lab-chain
+      uid: 6251b0c1-113b-47de-94e3-8fa8c1c617a1
+    resourceVersion: "761530"
+    uid: 6fc1c527-7699-4382-93f4-640f24252aa3
+  spec:
+    template:
+      metadata: {}
+      spec:
+        template:
+          metadata:
+            labels:
+              service: hbn
+          spec:
+            interfaceType: service
+            service:
+              interfaceName: net0
+              network: dpf-operator-system/mybrhbn
+              serviceID: hbn
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: ServiceInterfacePreReqsReady
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceSetReady
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceSetReconciled
+    observedGeneration: 2
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: DPUServiceInterface
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"DPUServiceInterface","metadata":{"annotations":{},"name":"pf0vf10-rep","namespace":"default"},"spec":{"template":{"spec":{"template":{"metadata":{"labels":{"vf":"pf0vf10"}},"spec":{"interfaceType":"vf","vf":{"parentInterfaceRef":"p0","pfID":0,"vfID":10}}}}}}}
+    creationTimestamp: "2026-11-14T14:09:37Z"
+    finalizers:
+    - svc.dpu.nvidia.com/dpuserviceinterface
+    generation: 1
+    name: pf0vf10-rep
+    namespace: default
+    resourceVersion: "793805"
+    uid: 5eca2071-6b84-4b95-99d9-047748cd79ec
+  spec:
+    template:
+      spec:
+        template:
+          metadata:
+            labels:
+              vf: pf0vf10
+          spec:
+            interfaceType: vf
+            vf:
+              parentInterfaceRef: p0
+              pfID: 0
+              vfID: 10
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacePreReqsReady
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceSetReady
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceSetReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: DPUServiceInterface
+  metadata:
+    annotations:
+      dpu.nvidia.com/consumed-by: ping-sf
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"DPUServiceInterface","metadata":{"annotations":{},"name":"ping-sf-ifc","namespace":"default"},"spec":{"template":{"spec":{"template":{"metadata":{"labels":{"app":"ping-sf"}},"spec":{"interfaceType":"service","service":{"interfaceName":"net1","network":"default/mybrsfc-lab","serviceID":"ping-sf"}}}}}}}
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/dpuserviceinterface
+    generation: 2
+    name: ping-sf-ifc
+    namespace: default
+    resourceVersion: "844609"
+    uid: e0d64f5f-7e16-41e8-924a-4a2210f11241
+  spec:
+    template:
+      metadata: {}
+      spec:
+        template:
+          metadata:
+            labels:
+              app: ping-sf
+          spec:
+            interfaceType: service
+            service:
+              interfaceName: net1
+              network: default/mybrsfc-lab
+              serviceID: ping-sf
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: ServiceInterfacePreReqsReady
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceSetReady
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 2
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceSetReconciled
+    observedGeneration: 2
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ hk get dpuservicechains.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: DPUServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/dpuservicechain
+    generation: 1
+    labels:
+      translation.opi.nvidia.com/mapping: servicefunctionchain
+      translation.opi.nvidia.com/source-kind: ServiceFunctionChain
+      translation.opi.nvidia.com/source-name: hbn-lab-chain
+    name: hbn-lab-chain
+    namespace: default
+    ownerReferences:
+    - apiVersion: config.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceFunctionChain
+      name: hbn-lab-chain
+      uid: 6251b0c1-113b-47de-94e3-8fa8c1c617a1
+    resourceVersion: "761579"
+    uid: 895eea61-15b6-4ce6-aefe-08fdf7981405
+  spec:
+    template:
+      spec:
+        template:
+          spec:
+            switches:
+            - ports:
+              - serviceInterface:
+                  matchLabels:
+                    service: hbn
+              serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainSetReady
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainSetReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: DPUServiceChain
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"DPUServiceChain","metadata":{"annotations":{},"name":"vf10-to-hbn","namespace":"default"},"spec":{"template":{"spec":{"template":{"spec":{"switches":[{"ports":[{"serviceInterface":{"matchLabels":{"vf":"pf0vf10"}}},{"serviceInterface":{"matchLabels":{"service":"hbn"}}}]}]}}}}}}
+    creationTimestamp: "2026-11-14T17:20:26Z"
+    finalizers:
+    - svc.dpu.nvidia.com/dpuservicechain
+    generation: 1
+    name: vf10-to-hbn
+    namespace: default
+    resourceVersion: "841246"
+    uid: 7313f425-3b22-4984-8725-d611f0711be1
+  spec:
+    template:
+      spec:
+        template:
+          spec:
+            switches:
+            - ports:
+              - serviceInterface:
+                  matchLabels:
+                    vf: pf0vf10
+              - serviceInterface:
+                  matchLabels:
+                    service: hbn
+              serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:20:27Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:20:27Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainSetReady
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainSetReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: DPUServiceChain
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"svc.dpu.nvidia.com/v1alpha1","kind":"DPUServiceChain","metadata":{"annotations":{},"name":"vf10-to-ping-sf","namespace":"default"},"spec":{"template":{"spec":{"template":{"spec":{"switches":[{"ports":[{"serviceInterface":{"matchLabels":{"vf":"pf0vf10"}}},{"serviceInterface":{"matchLabels":{"app":"ping-sf"}}}]}]}}}}}}
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/dpuservicechain
+    generation: 1
+    name: vf10-to-ping-sf
+    namespace: default
+    resourceVersion: "844666"
+    uid: 50b6cad5-312a-41ec-83f4-905e3c518510
+  spec:
+    template:
+      spec:
+        template:
+          spec:
+            switches:
+            - ports:
+              - serviceInterface:
+                  matchLabels:
+                    vf: pf0vf10
+              - serviceInterface:
+                  matchLabels:
+                    app: ping-sf
+              serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:09Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:09Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainSetReady
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainSetReconciled
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+
+===== tenant cluster =====
+
+$ tk get nodes -o wide --show-labels
+NAME              STATUS   ROLES    AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION         CONTAINER-RUNTIME    LABELS
+dh5-bluefield-3   Ready    <none>   2d    v1.34.8   172.22.222.8   <none>        Ubuntu 24.04.4 LTS   6.8.0-1022-bluefield   containerd://2.2.1   beta.kubernetes.io/arch=arm64,beta.kubernetes.io/os=linux,kubernetes.io/arch=arm64,kubernetes.io/hostname=dh5-bluefield-3,kubernetes.io/os=linux
+
+$ tk get nodes -o yaml
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Node
+  metadata:
+    annotations:
+      flannel.alpha.coreos.com/backend-data: '{"VNI":1,"VtepMAC":"42:5c:96:19:e0:1f"}'
+      flannel.alpha.coreos.com/backend-type: vxlan
+      flannel.alpha.coreos.com/kube-subnet-manager: "true"
+      flannel.alpha.coreos.com/public-ip: 172.22.222.8
+      node.alpha.kubernetes.io/ttl: "0"
+      provisioning.dpu.nvidia.com/last-applied-labels-on-dpu: "null"
+      volumes.kubernetes.io/controller-managed-attach-detach: "true"
+    creationTimestamp: "2026-11-14T11:00:14Z"
+    labels:
+      beta.kubernetes.io/arch: arm64
+      beta.kubernetes.io/os: linux
+      kubernetes.io/arch: arm64
+      kubernetes.io/hostname: dh5-bluefield-3
+      kubernetes.io/os: linux
+    name: dh5-bluefield-3
+    resourceVersion: "1146902"
+    uid: efffc56d-7e11-4954-9ee1-2ed16de85df0
+  spec:
+    podCIDR: 10.244.0.0/24
+    podCIDRs:
+    - 10.244.0.0/24
+  status:
+    addresses:
+    - address: 172.22.222.8
+      type: InternalIP
+    - address: dh5-bluefield-3
+      type: Hostname
+    allocatable:
+      cpu: "16"
+      ephemeral-storage: "112835620268"
+      hugepages-1Gi: "0"
+      hugepages-2Mi: 6Gi
+      hugepages-32Mi: "0"
+      hugepages-64Ki: "0"
+      memory: 25847836Ki
+      nvidia.com/bf_sf: "19"
+      ovs-cni.network.kubevirt.io/br-hbn: 1k
+      ovs-cni.network.kubevirt.io/br-sfc: 1k
+      pods: "110"
+    capacity:
+      cpu: "16"
+      ephemeral-storage: 122434484Ki
+      hugepages-1Gi: "0"
+      hugepages-2Mi: 6Gi
+      hugepages-32Mi: "0"
+      hugepages-64Ki: "0"
+      memory: 32241692Ki
+      nvidia.com/bf_sf: "19"
+      ovs-cni.network.kubevirt.io/br-hbn: 1k
+      ovs-cni.network.kubevirt.io/br-sfc: 1k
+      pods: "110"
+    conditions:
+    - lastHeartbeatTime: "2026-11-14T11:00:51Z"
+      lastTransitionTime: "2026-11-14T11:00:51Z"
+      message: Flannel is running on this node
+      reason: FlannelIsUp
+      status: "False"
+      type: NetworkUnavailable
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: Filesystem is not read-only
+      reason: FilesystemIsNotReadOnly
+      status: "False"
+      type: ReadonlyFilesystem
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: OVS processes have not been OOM killed recently
+      reason: IsHealthy
+      status: "False"
+      type: OVSHealthy
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: Physical uplink is up
+      reason: IsUp
+      status: "False"
+      type: UplinkHealthy
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: Network MTU is correctly configured
+      reason: IsCorrect
+      status: "False"
+      type: MTUConfigured
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: ovsdb-server service is running
+      reason: IsHealthy
+      status: "False"
+      type: OVSDBHealthy
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: ovs-vswitchd service is running
+      reason: IsHealthy
+      status: "False"
+      type: OVSvSwitchdHealthy
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: SR-IOV VF representors are present
+      reason: VFsFound
+      status: "False"
+      type: SRIOVHealthy
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: DPU is in correct mode
+      reason: ModeSet
+      status: "False"
+      type: DPUModeCorrect
+    - lastHeartbeatTime: "2026-11-16T11:21:47Z"
+      lastTransitionTime: "2026-11-14T11:00:21Z"
+      message: kernel has no deadlock
+      reason: KernelHasNoDeadlock
+      status: "False"
+      type: KernelDeadlock
+    - lastHeartbeatTime: "2026-11-16T11:22:04Z"
+      lastTransitionTime: "2026-11-14T11:00:14Z"
+      message: kubelet has sufficient memory available
+      reason: KubeletHasSufficientMemory
+      status: "False"
+      type: MemoryPressure
+    - lastHeartbeatTime: "2026-11-16T11:22:04Z"
+      lastTransitionTime: "2026-11-14T11:00:14Z"
+      message: kubelet has no disk pressure
+      reason: KubeletHasNoDiskPressure
+      status: "False"
+      type: DiskPressure
+    - lastHeartbeatTime: "2026-11-16T11:22:04Z"
+      lastTransitionTime: "2026-11-14T11:00:14Z"
+      message: kubelet has sufficient PID available
+      reason: KubeletHasSufficientPID
+      status: "False"
+      type: PIDPressure
+    - lastHeartbeatTime: "2026-11-16T11:22:04Z"
+      lastTransitionTime: "2026-11-14T11:00:30Z"
+      message: kubelet is posting ready status
+      reason: KubeletReady
+      status: "True"
+      type: Ready
+    daemonEndpoints:
+      kubeletEndpoint:
+        Port: 10250
+    features:
+      supplementalGroupsPolicy: true
+    images:
+    - names:
+      - nvcr.io/nvidia/doca/doca_hbn@sha256:9c2008c9ad1ad776fd1263072a78bd3dedaee2b9f315b99071d3e1495f7b1b4f
+      - nvcr.io/nvidia/doca/doca_hbn:3.4.0-doca3.4.0
+      sizeBytes: 286648543
+    - names:
+      - nvcr.io/nvidia/doca/dpf-system@sha256:62dc88a9f5f8f85c927c23582b70c79ea96fc75f73e50c190a0ebe0b89ce7b19
+      - nvcr.io/nvidia/doca/dpf-system:v26.4.0
+      sizeBytes: 227584327
+    - names:
+      - docker.io/nicolaka/netshoot@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+      - docker.io/nicolaka/netshoot:latest
+      sizeBytes: 213323436
+    - names:
+      - nvcr.io/nvidia/doca/ovs-cni-plugin@sha256:162caeb599709a48bd847beadd9ea158b657158b64a7313ef9d9ea8862ead41e
+      - nvcr.io/nvidia/doca/ovs-cni-plugin:v26.4.0
+      sizeBytes: 99037782
+    - names:
+      - ghcr.io/k8snetworkplumbingwg/multus-cni@sha256:c173235642a10055db53bc43898fc1058cc6b97178fc3472ce4dafdd6d940d0b
+      sizeBytes: 79885708
+    - names:
+      - ghcr.io/mellanox/nvidia-k8s-ipam@sha256:4b984dd345754e28ff964a209d76bff71ed31bb392b25aa5ddccf3925ac4e2ce
+      sizeBytes: 69842952
+    - names:
+      - registry.k8s.io/node-problem-detector/node-problem-detector@sha256:c380751accc5e15973f7bf98a3725c3c30826b36ae407903c34297be47b73bc6
+      sizeBytes: 64277289
+    - names:
+      - nvcr.io/nvidia/doca/dpf-cni-installer@sha256:b26bb01e1d255533122ba13a42726c6af0ab9dd101e9697edb7f2096b864f725
+      - nvcr.io/nvidia/doca/dpf-cni-installer:v26.4.0
+      sizeBytes: 36573495
+    - names:
+      - ghcr.io/flannel-io/flannel@sha256:782c111d55e850e8038cdaf35454987e6c170ae9b54d5b12895b02d45c908caf
+      sizeBytes: 32602066
+    - names:
+      - ghcr.io/k8snetworkplumbingwg/sriov-network-device-plugin@sha256:7c5901727d4500f103f038c178b41dc6450afa6f324306c1973495c9a7c4f5a5
+      sizeBytes: 27046789
+    - names:
+      - registry.k8s.io/kube-proxy@sha256:364da8a25c742d7a35e9635cb8cf42c1faf5b367760d0f9f9a75bdd1f9d52067
+      - registry.k8s.io/kube-proxy:v1.34.0
+      sizeBytes: 22788036
+    - names:
+      - registry.k8s.io/coredns/coredns@sha256:e7e6440cfd1e919280958f5b5a6ab2b184d385bba774c12ad2a9e1e4183f90d9
+      - registry.k8s.io/coredns/coredns:v1.14.2
+      sizeBytes: 20766250
+    - names:
+      - ghcr.io/flannel-io/flannel-cni-plugin@sha256:cb3176a2c9eae5fa0acd7f45397e706eacb4577dac33cad89f93b775ff5611df
+      sizeBytes: 5140697
+    - names:
+      - k8s.gcr.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097
+      - k8s.gcr.io/pause:3.9
+      sizeBytes: 268051
+    nodeInfo:
+      architecture: arm64
+      bootID: 068a0ae3-cbb3-47b3-8896-402a80e388ff
+      containerRuntimeVersion: containerd://2.2.1
+      kernelVersion: 6.8.0-1022-bluefield
+      kubeProxyVersion: ""
+      kubeletVersion: v1.34.8
+      machineID: d3d8b9ac0e4543c5998fd24241b136ba
+      operatingSystem: linux
+      osImage: Ubuntu 24.04.4 LTS
+      systemUUID: ba027dde-3c1e-ef11-8000-9c63c0e4b7d0
+    runtimeHandlers:
+    - features:
+        recursiveReadOnlyMounts: true
+        userNamespaces: true
+      name: ""
+    - features:
+        recursiveReadOnlyMounts: true
+        userNamespaces: true
+      name: runc
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ tk api-resources --api-group=svc.dpu.nvidia.com
+NAME                   SHORTNAMES   APIVERSION                    NAMESPACED   KIND
+servicechains                       svc.dpu.nvidia.com/v1alpha1   true         ServiceChain
+servicechainsets                    svc.dpu.nvidia.com/v1alpha1   true         ServiceChainSet
+serviceinterfaces                   svc.dpu.nvidia.com/v1alpha1   true         ServiceInterface
+serviceinterfacesets                svc.dpu.nvidia.com/v1alpha1   true         ServiceInterfaceSet
+
+$ tk get serviceinterfacesets.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterfaceSet
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - dpu.nvidia.com/serviceinterfaceset
+    generation: 1
+    name: hbn-ifc
+    namespace: default
+    resourceVersion: "451223"
+    uid: a062f312-f50c-4764-8d67-ad4c8dfb7f7e
+  spec:
+    template:
+      metadata:
+        labels:
+          service: hbn
+      spec:
+        interfaceType: service
+        service:
+          interfaceName: net0
+          network: dpf-operator-system/mybrhbn
+          serviceID: hbn
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacesReady
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacesReconciled
+    numberApplied: 1
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterfaceSet
+  metadata:
+    creationTimestamp: "2026-11-14T14:09:37Z"
+    finalizers:
+    - dpu.nvidia.com/serviceinterfaceset
+    generation: 1
+    name: pf0vf10-rep
+    namespace: default
+    resourceVersion: "470665"
+    uid: 00a4179a-8baa-4ca3-b59c-6365329827cb
+  spec:
+    template:
+      metadata:
+        labels:
+          vf: pf0vf10
+      spec:
+        interfaceType: vf
+        vf:
+          parentInterfaceRef: p0
+          pfID: 0
+          vfID: 10
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacesReady
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacesReconciled
+    numberApplied: 1
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterfaceSet
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - dpu.nvidia.com/serviceinterfaceset
+    generation: 1
+    name: ping-sf-ifc
+    namespace: default
+    resourceVersion: "504453"
+    uid: f9f5c80e-2c7e-49fb-b1ca-23bc9372e82d
+  spec:
+    template:
+      metadata:
+        labels:
+          app: ping-sf
+      spec:
+        interfaceType: service
+        service:
+          interfaceName: net1
+          network: default/mybrsfc-lab
+          serviceID: ping-sf
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacesReady
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfacesReconciled
+    numberApplied: 1
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ tk get serviceinterfaces.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      service: hbn
+      svc.dpu.nvidia.com/service-chain: hbn-lab-chain9dgkq
+      svc.dpu.nvidia.com/service-id: hbn
+      svc.dpu.nvidia.com/serviceinterfaceset-name: hbn-ifc
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+    name: hbn-ifcpf7sm
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: hbn-ifc
+      uid: a062f312-f50c-4764-8d67-ad4c8dfb7f7e
+    resourceVersion: "1147412"
+    uid: 4fbfc124-e9fc-455c-afeb-a1ed1ce3975b
+  spec:
+    interfaceType: service
+    node: dh5-bluefield-3
+    service:
+      interfaceName: net0
+      network: dpf-operator-system/mybrhbn
+      serviceID: hbn
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-14T14:09:37Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/service-chain: vf10-to-ping-sfgnd92
+      svc.dpu.nvidia.com/serviceinterfaceset-name: pf0vf10-rep
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+      vf: pf0vf10
+    name: pf0vf10-repv6pdb
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: pf0vf10-rep
+      uid: 00a4179a-8baa-4ca3-b59c-6365329827cb
+    resourceVersion: "1147410"
+    uid: ba5b1ade-4f53-458a-8b7a-4763367e93e2
+  spec:
+    interfaceType: vf
+    node: dh5-bluefield-3
+    vf:
+      parentInterfaceRef: p0-dh5-bluefield-3
+      pfID: 0
+      vfID: 10
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T14:09:37Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceInterface
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceInterface-finalizer
+    generation: 1
+    labels:
+      app: ping-sf
+      svc.dpu.nvidia.com/service-chain: vf10-to-ping-sfgnd92
+      svc.dpu.nvidia.com/service-id: ping-sf
+      svc.dpu.nvidia.com/serviceinterfaceset-name: ping-sf-ifc
+      svc.dpu.nvidia.com/serviceinterfaceset-namespace: default
+    name: ping-sf-ifcx5ccg
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceInterfaceSet
+      name: ping-sf-ifc
+      uid: f9f5c80e-2c7e-49fb-b1ca-23bc9372e82d
+    resourceVersion: "504509"
+    uid: dbe5f929-76bb-4451-a1c7-30e5f5d1a8fe
+  spec:
+    interfaceType: service
+    node: dh5-bluefield-3
+    service:
+      interfaceName: net1
+      network: default/mybrsfc-lab
+      serviceID: ping-sf
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceInterfaceReconciled
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ tk get servicechainsets.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChainSet
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - dpu.nvidia.com/servicechainset
+    generation: 1
+    name: hbn-lab-chain
+    namespace: default
+    resourceVersion: "451268"
+    uid: 8dd86943-0b3f-4fa0-87a6-8854741cc798
+  spec:
+    template:
+      metadata: {}
+      spec:
+        switches:
+        - ports:
+          - serviceInterface:
+              matchLabels:
+                service: hbn
+          serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainsReady
+    - lastTransitionTime: "2026-11-14T12:10:10Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainsReconciled
+    numberApplied: 1
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChainSet
+  metadata:
+    creationTimestamp: "2026-11-14T17:20:26Z"
+    finalizers:
+    - dpu.nvidia.com/servicechainset
+    generation: 1
+    name: vf10-to-hbn
+    namespace: default
+    resourceVersion: "501596"
+    uid: 9af102c8-c21c-4c1a-a25d-479de9a7643d
+  spec:
+    template:
+      metadata: {}
+      spec:
+        switches:
+        - ports:
+          - serviceInterface:
+              matchLabels:
+                vf: pf0vf10
+          - serviceInterface:
+              matchLabels:
+                service: hbn
+          serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainsReady
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainsReconciled
+    numberApplied: 1
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChainSet
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - dpu.nvidia.com/servicechainset
+    generation: 1
+    name: vf10-to-ping-sf
+    namespace: default
+    resourceVersion: "504512"
+    uid: af47c98a-ea5d-44dd-b223-e3d24c1617cc
+  spec:
+    template:
+      metadata: {}
+      spec:
+        switches:
+        - ports:
+          - serviceInterface:
+              matchLabels:
+                vf: pf0vf10
+          - serviceInterface:
+              matchLabels:
+                app: ping-sf
+          serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:09Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:09Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainsReady
+    - lastTransitionTime: "2026-11-14T17:34:03Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainsReconciled
+    numberApplied: 1
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+
+$ tk get servicechains.svc.dpu.nvidia.com -A -o yaml
+apiVersion: v1
+items:
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T12:10:10Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: hbn-lab-chain
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: hbn-lab-chain9dgkq
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: hbn-lab-chain
+      uid: 8dd86943-0b3f-4fa0-87a6-8854741cc798
+    resourceVersion: "451266"
+    uid: 456a6626-d9d8-4960-982d-2b1170d4474c
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            service: hbn
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T12:10:15Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T17:20:26Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: vf10-to-hbn
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: vf10-to-hbngx8p4
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: vf10-to-hbn
+      uid: 9af102c8-c21c-4c1a-a25d-479de9a7643d
+    resourceVersion: "501595"
+    uid: 30908801-ad2f-42b0-a1f6-b61b6d81b90a
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            vf: pf0vf10
+      - serviceInterface:
+          matchLabels:
+            service: hbn
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:20:26Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+- apiVersion: svc.dpu.nvidia.com/v1alpha1
+  kind: ServiceChain
+  metadata:
+    creationTimestamp: "2026-11-14T17:34:03Z"
+    finalizers:
+    - svc.dpu.nvidia.com/ServiceChain-finalizer
+    generation: 1
+    labels:
+      svc.dpu.nvidia.com/servicechainset-name: vf10-to-ping-sf
+      svc.dpu.nvidia.com/servicechainset-namespace: default
+    name: vf10-to-ping-sfgnd92
+    namespace: default
+    ownerReferences:
+    - apiVersion: svc.dpu.nvidia.com/v1alpha1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ServiceChainSet
+      name: vf10-to-ping-sf
+      uid: af47c98a-ea5d-44dd-b223-e3d24c1617cc
+    resourceVersion: "504511"
+    uid: bbb51b05-1b63-4c31-ac05-6837691c25e8
+  spec:
+    node: dh5-bluefield-3
+    switches:
+    - ports:
+      - serviceInterface:
+          matchLabels:
+            vf: pf0vf10
+      - serviceInterface:
+          matchLabels:
+            app: ping-sf
+      serviceMTU: 1500
+  status:
+    conditions:
+    - lastTransitionTime: "2026-11-14T17:34:08Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2026-11-14T17:34:08Z"
+      message: ""
+      observedGeneration: 1
+      reason: Success
+      status: "True"
+      type: ServiceChainReconciled
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""

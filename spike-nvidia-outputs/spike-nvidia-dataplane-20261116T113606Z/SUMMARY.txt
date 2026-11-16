@@ -1,0 +1,37 @@
+spike 20261116T113606Z host=dh5 active=1 dpu-access=yes
+S1 PF 0000:0d:00.0 (enp13s0f0np0): totalvfs=46 numvfs=46
+S1   VF0 master: br-dpu; VFs not in host netns: 10 
+S1   VFs on a bridge: 0(br-dpu) 
+S1 PF 0000:0d:00.1 (enp13s0f1np1): totalvfs=46 numvfs=46
+S1   VF0 master: -; VFs not in host netns: 
+S1   VFs on a bridge: 
+S1 DPUFlavor NUM_OF_VFS: NUM_OF_VFS=46 
+S1 boot files mentioning sriov_numvfs: 0
+S2 DPF DPU (name / dpuNodeName / phase):
+S2   dh5-bluefield-3   dh5   Ready
+S2 tenant nodes and their dpu/nvidia labels:
+S2   dh5-bluefield-3: "kubernetes.io/hostname":"dh5-bluefield-3" 
+S6 dpu-cni binary on host: not found
+S6 dpu-daemon nodeSelector: {"dpu":"true"}; node dh5 label dpu=
+S6 node allocatable openshift.io/dpu= nvidia.com/mlnx_sriov=1
+ACTIVE using PF 0000:0d:00.0 (enp13s0f0np0), spare VFs 44 and 45, namespace default
+S6 PF-side VF op mac: OK
+S6 PF-side VF op vlan0: OK
+S6 PF-side VF op spoofchk-off: FAIL (RTNETLINK answers: Operation not permitted)
+S6 PF-side VF op spoofchk-on: FAIL (RTNETLINK answers: Operation not permitted)
+S6 PF-side VF op trust-on: FAIL (RTNETLINK answers: Operation not permitted)
+S6 PF-side VF op trust-off: FAIL (RTNETLINK answers: Operation not permitted)
+S6 PF-side VF op state-auto: FAIL (RTNETLINK answers: Operation not permitted)
+S6 PF-side VF op max-tx-rate: FAIL (RTNETLINK answers: Operation not permitted)
+S3 ping before any spike object: 0/5
+S4 vf DPUServiceInterface Ready after: A=0.5s B=0.6s; representor on br-sfc after: A=n/a B=n/a
+S3 ping with interfaces but no chain: 0/5
+S3 chain mode=single (one port selecting both VFs): Ready after timeouts, ping 0/5
+S3 chain mode=pair (one port per VF): Ready after 1.4s, ping 5/5
+S5 chain-2 (same ports) while chain-1 exists: Ready=True Success: 
+S5   start: chain-1 only                                            replies=49 lost=0
+S5   chain-2 applied with the same ports while chain-1 exists       replies=119 lost=0
+S5   chain-1 deleted (chain-2 only)                                 replies=118 lost=0
+S5   chain-2 deleted (no chain)                                     replies=1 lost=92
+S5   chain-1 re-applied                                             replies=5 lost=3
+S5   chain-1 Ready                                                  replies=72 lost=0

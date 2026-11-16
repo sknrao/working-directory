@@ -1,0 +1,13 @@
+
+===== S6 active: PF-side VF ops the upstream sriov CNI performs (PF enp13s0f0np0, VF 44) =====
+original admin MAC: b6:84:a0:83:c0:df
+mac            rc=0 
+vlan0          rc=0 
+spoofchk-off   rc=2 RTNETLINK answers: Operation not permitted
+spoofchk-on    rc=2 RTNETLINK answers: Operation not permitted
+trust-on       rc=2 RTNETLINK answers: Operation not permitted
+trust-off      rc=2 RTNETLINK answers: Operation not permitted
+state-auto     rc=2 RTNETLINK answers: Operation not permitted
+max-tx-rate    rc=2 RTNETLINK answers: Operation not permitted
+    vf 44     link/ether 02:00:00:00:5a:01 brd ff:ff:ff:ff:ff:ff, spoof checking off, link-state auto, trust off, query_rss off
+restored VF 44 admin MAC b6:84:a0:83:c0:df

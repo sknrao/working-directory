@@ -1,0 +1,7 @@
+1794829326.954 start: chain-1 only
+1794829336.959 chain-2 applied with the same ports while chain-1 exists
+1794829361.799 chain-1 deleted (chain-2 only)
+1794829386.357 chain-2 deleted (no chain)
+1794829405.964 chain-1 re-applied
+1794829407.377 chain-1 Ready
+1794829422.384 end

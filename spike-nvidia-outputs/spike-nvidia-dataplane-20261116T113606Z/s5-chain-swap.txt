@@ -1,0 +1,15 @@
+
+===== S5 chain swap (mode=pair) =====
+dpuservicechain.svc.dpu.nvidia.com/spike-chain-2 created
+--- chain-2 conditions while chain-1 exists
+Ready=True Success: 
+ServiceChainSetReady=True Success: 
+ServiceChainSetReconciled=True Success: 
+--- chain-1 conditions while chain-2 exists
+Ready=True Success: 
+ServiceChainSetReady=True Success: 
+ServiceChainSetReconciled=True Success: 
+dpuservicechain.svc.dpu.nvidia.com "spike-chain-1" deleted from default namespace
+dpuservicechain.svc.dpu.nvidia.com "spike-chain-2" deleted from default namespace
+dpuservicechain.svc.dpu.nvidia.com/spike-chain-1 created
+chain-1 Ready after 1.4s
